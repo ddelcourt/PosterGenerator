@@ -595,7 +595,14 @@ function build(){
 function setup(){
   loadState(); // Restore saved parameters before building
   createCanvas(10,10).parent('stage'); noLoop(); renderLayers();
-  document.fonts.load('600 20px Inter').then(()=>{build(); fit(); updateLoop();});
+
+  // Load all weights for every font family currently in use across all three layers,
+  // then build and render. This ensures emWidths() always measures the real glyphs.
+  const families = [...new Set([P.font, P.amrFont, P.fFont])];
+  const loads = families.flatMap(fam =>
+    (FONT_WEIGHTS[fam] || [400]).map(w => document.fonts.load(`${w} 20px "${fam}"`))
+  );
+  Promise.all(loads).then(() => { build(); fit(); updateLoop(); });
   
   // Theme toggle
   const btn = document.getElementById('themeToggle');
