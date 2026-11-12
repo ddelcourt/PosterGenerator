@@ -15,6 +15,9 @@ build/
 # macOS
 .DS_Store
 
+# Copilot
+.copilot-context
+
 # Editor
 .vscode/settings.json
 *.swp
