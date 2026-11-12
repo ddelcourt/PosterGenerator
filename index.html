@@ -755,7 +755,7 @@ function animFrame(now){
   }
   requestAnimationFrame(animFrame);
 }
-function stopAnim(){ animOn = false; document.getElementById('anim').checked = false; }
+function stopAnim(){ animOn = false; document.getElementById('anim').checked = false; saveState(); }
 document.getElementById('anim').addEventListener('change', e => e.target.checked ? startAnim() : (animOn = false));
 document.getElementById('speed').addEventListener('input', e => {
   animSpeed = parseFloat(e.target.value); document.getElementById('speedv').textContent = animSpeed;
@@ -776,18 +776,18 @@ document.querySelectorAll('#fitSeg button').forEach(b => b.addEventListener('cli
   document.querySelectorAll('#typeSliders input').forEach(i => i.disabled = P.amrFit);   // size and line height only apply in manual mode
   redraw(); saveState();
 }));
-function bindGlyphs(id, list, rebuild){   // text fields that edit a list of characters
+function bindGlyphs(id, list, rebuild, getFontStr){   // text fields that edit a list of characters
   document.querySelectorAll(`#${id} input`).forEach((el, i) => {
     el.addEventListener('input', () => {
       const ch = Array.from(el.value.trim())[0] || '';
       el.value = ch; list[i] = ch; if (rebuild) build(); redraw();
-      document.fonts.load('600 20px Inter', ch || ' ').then(redraw);   // pull in the glyph's font subset if needed
+      document.fonts.load(getFontStr(), ch || ' ').then(redraw);   // pull in the glyph for the active font
       saveState();
     });
   });
 }
-bindGlyphs('glyphsJazz', GLYPHS, true);
-bindGlyphs('glyphsAmr', AMR, false);
+bindGlyphs('glyphsJazz', GLYPHS, true,  () => `${P.weight} 20px "${P.font}"`);
+bindGlyphs('glyphsAmr',  AMR,   false, () => `${P.amrWeight} 20px "${P.amrFont}"`);
 document.getElementById('fText').addEventListener('input', e => { P.fText = e.target.value; redraw(); saveState(); });
 document.getElementById('fNewDir').addEventListener('click', () => {
   P.fSeed = Math.floor(Math.random()*100000); document.getElementById('fSeed').value = P.fSeed; redraw(); saveState();
