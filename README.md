@@ -1,4 +1,4 @@
-# AMR Festival Poster Generator
+# Festival Poster Generator
 
 A browser-based generative poster tool for the AMR Jazz Festival 2027. Produces typographic compositions from three composited layers, with export to PNG, live-text SVG, and fully outlined SVG (text as vector paths — no font dependency on the target machine).
 
@@ -37,7 +37,7 @@ Layers can be reordered by drag-and-drop. Each has independent font, weight, col
 | Save SVG (Outlined) | Vector, text as paths | None — fully portable |
 | Export JSON | Settings snapshot | — |
 
-**SVG (Outlined)** uses [opentype.js](https://opentype.js.org/) to parse the bundled TTF files and render every glyph as a `<path>`. Coordinates stay in centimetres to match the SVG viewBox. The library loads from CDN on first use. See [`docs/EXPORT.md`](docs/EXPORT.md) for the full pipeline.
+**SVG (Outlined)** uses [opentype.js](https://opentype.js.org/) to parse the bundled TTF files and render every glyph as a `<path>`. Coordinates stay in centimetres to match the SVG viewBox. The library is bundled locally at `js/libs/opentype.min.js` and loaded on demand. See [`docs/EXPORT.md`](docs/EXPORT.md) for the full pipeline.
 
 ---
 
@@ -84,5 +84,5 @@ archive/            Original monolithic version and early SVG samples
 ## Tech
 
 - Canvas rendering: [p5.js](https://p5js.org/) 1.9.4
-- Font outline export: [opentype.js](https://opentype.js.org/) (loaded on demand from CDN)
-- No build step · No npm · No frameworks
+- Font outline export: [opentype.js](https://opentype.js.org/) 1.3.4 (bundled at `js/libs/opentype.min.js`, loaded on demand)
+- No build step · No npm · No frameworks · No CDN required

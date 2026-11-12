@@ -59,7 +59,7 @@ Text is converted to filled `<path>` shapes before export. The resulting SVG has
 
 ### How It Works
 
-1. **opentype.js is loaded on first use.** The library (~90 KB) is fetched from CDN (`cdn.jsdelivr.net`) and cached for the session. Subsequent outline exports reuse it without an additional network request.
+1. **opentype.js is loaded on first use.** The library (~167 KB minified) is bundled at `js/libs/opentype.min.js` and injected into the page as a `<script>` tag on the first outline export. Subsequent exports reuse the cached instance with no additional load.
 
 2. **Font files are fetched and parsed once per session.** Only the families and weights actually used in the current poster are loaded from `/fonts/`. Parsed `Font` objects are cached so they are not re-parsed on repeated exports.
 
@@ -81,8 +81,8 @@ Text is converted to filled `<path>` shapes before export. The resulting SVG has
 
 ### Requirements
 
-- The app must be served over HTTP (`python3 -m http.server 8000`), not opened as a local file, so that the font files and the opentype.js CDN script can be fetched.
-- An internet connection is needed the first time per session (to load opentype.js). After that, the library is cached by the browser.
+- The app must be served over HTTP (`python3 -m http.server 8000`), not opened as a local file, so that the font TTF files can be fetched for path generation.
+- No internet connection is needed — opentype.js is bundled locally at `js/libs/opentype.min.js`.
 
 ### When to Use
 
