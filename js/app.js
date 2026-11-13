@@ -2,9 +2,11 @@
 const P = {w:89.5, h:128, minC:0.4, maxC:20, curve:0.5, seed:7, seq:100, grad:false,
            lines:false, letters:true, ink:'#000000', lineColor:'#cdcdcd',
            font:'Inter', weight:600, fill:82, fillExp:0,
+           jMt:0, jMb:0, jMl:0, jMr:0, jLineH:0,
            bg:'#ffffff', amrMv:2.5, amrMh:5, amrColor:'#e02020',
            amrFit:false, amrSize:50, amrLine:42.5, amrFont:'Inter', amrWeight:600,
-           fText:'FESTIVAL', fColor:'#1f3bd8', fSize:22, fGap:6, fMt:6, fMb:6, fPlay:true, fSpeed:10, fSeed:3,
+           amrMt:2.5, amrMb:2.5, amrMl:5, amrMr:5,
+           fText:'FESTIVAL', fColor:'#1f3bd8', fSize:22, fGap:6, fMt:6, fMb:6, fMl:0, fMr:0, fLineH:0, fPlay:true, fSpeed:10, fSeed:3,
            fFont:'Inter', fWeight:600,
            glyphs:['J','A','Z','Z'], amrChars:['A','M','R']};
 
@@ -36,6 +38,38 @@ const WEIGHT_NAMES = {
 // font-key → its paired weight-key, and vice-versa
 const FONT_TO_WEIGHT = { font:'weight', amrFont:'amrWeight', fFont:'fWeight' };
 const WEIGHT_TO_FONT = { weight:'font', amrWeight:'amrFont', fWeight:'fFont' };
+// Routes logical common-section keys to the real P key for each layer
+const LAYER_MAP = {
+  division: { color: 'ink',      font: 'font',    weight: 'weight'    },
+  amr:      { color: 'amrColor', font: 'amrFont', weight: 'amrWeight' },
+  festival: { color: 'fColor',   font: 'fFont',   weight: 'fWeight'   }
+};
+const LAYER_COMMON_CFG = {
+  division: {
+    size:       { key: 'fill',    min: 20, max: 100, step: 1,   unit: '%',  fmt: 0, label: 'Letter fill' },
+    lineheight: { key: 'jLineH',  min: 0,  max: 128, step: 0.5, unit: 'cm', fmt: 2, label: 'Row height' },
+    marginT:    { key: 'jMt',     min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 },
+    marginB:    { key: 'jMb',     min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 },
+    marginL:    { key: 'jMl',     min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 },
+    marginR:    { key: 'jMr',     min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 }
+  },
+  amr: {
+    size:       { key: 'amrSize', min: 1,  max: 150, step: 0.5, unit: 'cm', fmt: 2, label: 'Font size' },
+    lineheight: { key: 'amrLine', min: 1,  max: 130, step: 0.5, unit: 'cm', fmt: 2, label: 'Line height' },
+    marginT:    { key: 'amrMt',   min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 },
+    marginB:    { key: 'amrMb',   min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 },
+    marginL:    { key: 'amrMl',   min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 },
+    marginR:    { key: 'amrMr',   min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 }
+  },
+  festival: {
+    size:       { key: 'fSize',   min: 1,  max: 120, step: 0.5, unit: 'cm', fmt: 2, label: 'Font size' },
+    lineheight: { key: 'fLineH',  min: 0,  max: 128, step: 0.5, unit: 'cm', fmt: 2, label: 'Row height' },
+    marginT:    { key: 'fMt',     min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 },
+    marginB:    { key: 'fMb',     min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 },
+    marginL:    { key: 'fMl',     min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 },
+    marginR:    { key: 'fMr',     min: 0,  max: 50,  step: 0.5, unit: 'cm', fmt: 2 }
+  }
+};
 
 function nearestWeight(family, w) {
   const avail = FONT_WEIGHTS[family] || [400];
@@ -57,6 +91,71 @@ function populateWeightSelect(weightKey) {
 
 function initWeightSelects() {
   ['weight', 'amrWeight', 'fWeight'].forEach(populateWeightSelect);
+}
+
+function populateWeightSelectCommon(layerId) {
+  const map = LAYER_MAP[layerId];
+  const family = P[map.font];
+  if (!family) return;
+  const avail   = FONT_WEIGHTS[family] || [400];
+  const snapped = nearestWeight(family, P[map.weight]);
+  P[map.weight] = snapped;
+  const sel = document.querySelector('[data-common="weight"]');
+  if (!sel) return;
+  sel.innerHTML = avail.map(w =>
+    `<option value="${w}"${w === snapped ? ' selected' : ''}>${w} — ${WEIGHT_NAMES[w] || w}</option>`
+  ).join('');
+}
+
+function syncCommonSection(layerId) {
+  const map = LAYER_MAP[layerId];
+  const cfg = LAYER_COMMON_CFG[layerId];
+
+  document.querySelector('[data-common="color"]').value = P[map.color];
+  document.querySelector('[data-common="font"]').value  = P[map.font];
+  populateWeightSelectCommon(layerId);
+
+  const lettersEl = document.querySelector('[data-common="letters"]');
+  if (layerId === 'division') {
+    lettersEl.value       = GLYPHS.filter(Boolean).join('');
+    lettersEl.placeholder = 'Characters in order (e.g. JAZZ)';
+  } else if (layerId === 'amr') {
+    lettersEl.value       = AMR.filter(Boolean).join('');
+    lettersEl.placeholder = 'One character per row (e.g. AMR)';
+  } else {
+    lettersEl.value       = P.fText;
+    lettersEl.placeholder = 'Repeated word (e.g. FESTIVAL)';
+  }
+
+  // Size (always present, but label/unit/range change per layer)
+  const sizeCfg = cfg.size;
+  const sizeEl  = document.querySelector('[data-common="size"]');
+  sizeEl.min = sizeCfg.min; sizeEl.max = sizeCfg.max; sizeEl.step = sizeCfg.step;
+  sizeEl.value    = P[sizeCfg.key];
+  sizeEl.disabled = layerId === 'amr' && P.amrFit;
+  document.getElementById('commonSizeLbl').textContent  = sizeCfg.label;
+  document.getElementById('commonSizeUnit').textContent = sizeCfg.unit;
+  document.getElementById('commonSizev').textContent    = Number(P[sizeCfg.key]).toFixed(sizeCfg.fmt);
+
+  // Line height (all layers; label changes per layer)
+  const lhCfg = cfg.lineheight;
+  const lhEl  = document.querySelector('[data-common="lineheight"]');
+  lhEl.min = lhCfg.min; lhEl.max = lhCfg.max; lhEl.step = lhCfg.step;
+  lhEl.value    = P[lhCfg.key];
+  lhEl.disabled = layerId === 'amr' && P.amrFit;
+  document.getElementById('commonLineHLbl').textContent = lhCfg.label;
+  document.getElementById('commonLineHv').textContent   = Number(P[lhCfg.key]).toFixed(lhCfg.fmt);
+
+  // Margins (all layers, all 4 independent)
+  const marginKeys = ['marginT', 'marginB', 'marginL', 'marginR'];
+  const outIds     = ['commonMTv', 'commonMBv', 'commonMLv', 'commonMRv'];
+  marginKeys.forEach((mk, idx) => {
+    const mcfg = cfg[mk];
+    const mel  = document.querySelector(`[data-common="${mk}"]`);
+    mel.min = mcfg.min; mel.max = mcfg.max; mel.step = mcfg.step;
+    mel.value = P[mcfg.key];
+    document.getElementById(outIds[idx]).textContent = Number(P[mcfg.key]).toFixed(mcfg.fmt);
+  });
 }
 
 let cells = [], cellsVer = 0, selLayer = 0;
@@ -125,20 +224,24 @@ const layers = [{
 
 /* Layer 2: three stacked lines, one letter each, top to bottom. */
 function amrItems(){
-  const em = emWidths(P.amrFont, P.amrWeight), third = P.h/3;
-  const boxH = Math.max(0.1, third - 2*P.amrMv), boxW = Math.max(0.1, P.w - 2*P.amrMh);
-  const L = P.amrFit ? third : P.amrLine, top0 = (P.h - 3*L)/2;
-  const items = [];
-  AMR.forEach((ch, i) => {
-    if (!ch) return;
-    const s = P.amrFit ? Math.min(boxH/CAP, boxW/em(ch)) : P.amrSize;
-    items.push({ch, x: P.w/2, y: top0 + i*L + (L + s*CAP)/2, s});   // y is the baseline
+  const em      = emWidths(P.amrFont, P.amrWeight);
+  const nRows   = Math.max(1, AMR.filter(Boolean).length);
+  const totalH  = Math.max(0.1, P.h - P.amrMt - P.amrMb);
+  const totalW  = Math.max(0.1, P.w - P.amrMl - P.amrMr);
+  const rowH    = totalH / nRows;
+  const cx      = P.amrMl + totalW / 2;
+  const L       = P.amrFit ? rowH : P.amrLine;
+  const top0    = P.amrMt + (totalH - nRows * L) / 2;
+  const items   = [];
+  AMR.filter(Boolean).forEach((ch, i) => {
+    const s = P.amrFit ? Math.min(rowH/CAP, totalW/em(ch)) : P.amrSize;
+    items.push({ch, x: cx, y: top0 + i*L + (L + s*CAP)/2, s});   // y is the baseline
   });
   return items;
 }
 layers.push({
   id: 'amr', name: 'AMR', visible: true, cached: true,
-  key: () => [P.w, P.h, P.amrMv, P.amrMh, P.amrColor, P.amrFit, P.amrSize, P.amrLine, AMR.join(''), P.amrFont, P.amrWeight].join(),
+  key: () => [P.w, P.h, P.amrMt, P.amrMb, P.amrMl, P.amrMr, P.amrColor, P.amrFit, P.amrSize, P.amrLine, AMR.join(''), P.amrFont, P.amrWeight].join(),
   draw(g, k){
     g.fillStyle = P.amrColor; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
     for (const it of amrItems()){ g.font = `${P.amrWeight} ${it.s*k}px "${P.amrFont}", sans-serif`; g.fillText(it.ch, it.x*k, it.y*k); }
@@ -167,7 +270,8 @@ function festItems(){
   const text = P.fText;
   if (!text) return {text, rows: []};
   const w = emWidths(P.fFont, P.fWeight)(text) * P.fSize, period = Math.max(0.1, w + P.fGap);
-  const pitch = Math.max(0, P.h - P.fMt - P.fMb) / ROWS, capH = P.fSize * CAP;
+  const pitch = P.fLineH > 0 ? P.fLineH : Math.max(0.1, (P.h - P.fMt - P.fMb) / ROWS);
+  const capH  = P.fSize * CAP;
   const rows = [];
   for (let i = 0; i < ROWS; i++){
     const o = ((fOff[i] % period) + period) % period, xs = [];
@@ -182,12 +286,15 @@ layers.push({
     const {text, rows} = festItems();
     g.fillStyle = P.fColor; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
     g.font = `${P.fWeight} ${P.fSize*k}px "${P.fFont}", sans-serif`;
+    g.save();
+    g.beginPath(); g.rect(P.fMl*k, 0, (P.w - P.fMl - P.fMr)*k, P.h*k); g.clip();
     for (const r of rows) for (const x of r.xs) g.fillText(text, x*k, r.y*k);
+    g.restore();
   },
   svg(){
     const {text, rows} = festItems(), f = v => +v.toFixed(4);
     const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    return `<clipPath id="festival-clip"><rect width="${P.w}" height="${P.h}"/></clipPath>\n` +
+    return `<clipPath id="festival-clip"><rect x="${f(P.fMl)}" y="0" width="${f(P.w - P.fMl - P.fMr)}" height="${f(P.h)}"/></clipPath>\n` +
       `<g id="layer-festival" clip-path="url(#festival-clip)" font-family="${P.fFont}" font-weight="${P.fWeight}" font-size="${f(P.fSize)}" fill="${P.fColor}">` +
       rows.map(r => r.xs.map(x => `<text x="${f(x)}" y="${f(r.y)}">${esc(text)}</text>`).join('')).join('') + '</g>\n';
   }
@@ -249,29 +356,33 @@ function renderLayers(){
       if      (selLayer === from)                                selLayer = to;
       else if (from < to && selLayer > from && selLayer <= to)  selLayer--;
       else if (from > to && selLayer >= to && selLayer < from)  selLayer++;
-      renderLayers(); redraw();
+      renderLayers(); redraw(); saveState();
     });
   });
-  document.querySelectorAll('.pal[data-layer]').forEach(p => {
-    p.hidden = p.dataset.layer !== layers[selLayer].id;
-    p.querySelector('.pal-title').textContent = `${layers[selLayer].name}: ${p.dataset.title}`;
+  document.querySelectorAll('#properties [id^="layer-props-"]').forEach(div => {
+    div.hidden = div.id !== 'layer-props-' + layers[selLayer].id;
   });
+  syncCommonSection(layers[selLayer].id);
   if (!isMobile()) autoLayout(true);
 }
 
 // ============ CELL DIVISION ============
 function build(){
   const r = rng(P.seed);
-  const halfMin = Math.min(P.w, P.h) / 2;
+  const x0 = P.jMl, y0 = P.jMt;
+  const cw = Math.max(0.1, P.w - P.jMl - P.jMr);
+  const ch = Math.max(0.1, P.h - P.jMt - P.jMb);
+  const halfMin = Math.min(cw, ch) / 2;
   const ratio = Math.max(P.maxC, P.minC*1.01) / P.minC;
   const targetAt = (px, py) => {
-    const minToBorder = Math.min(px, py, P.w - px, P.h - py);
+    const minToBorder = Math.min(px - x0, py - y0, x0 + cw - px, y0 + ch - py);
     const d = Math.min(1, Math.max(0, 1 - minToBorder / halfMin));
     return P.minC * Math.pow(ratio, Math.pow(d, P.curve));
   };
   cells = []; cellsVer++;
-  (function split(x, y, w, h, n){
-    const minToBorder = Math.max(0, Math.min(x, y, P.w - (x+w), P.h - (y+h)));
+  let split;
+  split = function(x, y, w, h, n){
+    const minToBorder = Math.max(0, Math.min(x - x0, y - y0, x0 + cw - (x+w), y0 + ch - (y+h)));
     const d = Math.min(1, Math.max(0, 1 - minToBorder / halfMin));
     const target = P.minC * Math.pow(ratio, Math.pow(d, P.curve));
     if (Math.max(w,h) > target && Math.min(w,h) > 0.05 && n < 30 && cells.length < 40000){
@@ -284,7 +395,14 @@ function build(){
       if (w >= h){ split(x, y, w*f, h, n+1); split(x+w*f, y, w*(1-f), h, n+1); }
       else       { split(x, y, w, h*f, n+1); split(x, y+h*f, w, h*(1-f), n+1); }
     } else cells.push({x, y, w, h, g: ''});
-  })(0, 0, P.w, P.h, 0);
+  };
+  // jLineH > 0: divide content area into horizontal bands before subdividing
+  if (P.jLineH > 0 && P.jLineH < ch) {
+    for (let y = y0; y < y0 + ch; y += P.jLineH)
+      split(x0, y, cw, Math.min(P.jLineH, y0 + ch - y), 0);
+  } else {
+    split(x0, y0, cw, ch, 0);
+  }
   const q = v => Math.round(v*1e6);
   cells.sort((a, b) => q(a.y)-q(b.y) || q(a.x)-q(b.x));
   const pool = GLYPHS.filter(Boolean); if (!pool.length) pool.push(' ');
@@ -414,9 +532,12 @@ function animFrame(now){
   requestAnimationFrame(animFrame);
 }
 function stopAnim(){ animOn = false; document.getElementById('anim').checked = false; saveState(); }
-document.getElementById('anim').addEventListener('change', e => e.target.checked ? startAnim() : (animOn = false));
+document.getElementById('anim').addEventListener('change', e => {
+  if (e.target.checked) { startAnim(); saveState(); } else { animOn = false; saveState(); }
+});
 document.getElementById('speed').addEventListener('input', e => {
   animSpeed = parseFloat(e.target.value); document.getElementById('speedv').textContent = animSpeed;
+  saveState();
 });
 ['minC','maxC','curve'].forEach(k => {
   document.querySelector(`[data-k="${k}"]`).addEventListener('input', stopAnim);
@@ -430,23 +551,57 @@ document.querySelectorAll('#modeSeg button').forEach(b => b.addEventListener('cl
 document.querySelectorAll('#fitSeg button').forEach(b => b.addEventListener('click', () => {
   P.amrFit = b.dataset.mode === 'fit';
   document.querySelectorAll('#fitSeg button').forEach(o => o.setAttribute('aria-pressed', o === b));
-  document.querySelectorAll('#typeSliders input').forEach(i => i.disabled = P.amrFit);
+  document.querySelector('[data-common="size"]').disabled       = P.amrFit;
+  document.querySelector('[data-common="lineheight"]').disabled = P.amrFit;
   redraw(); saveState();
 }));
 
-function bindGlyphs(id, list, rebuild, getFontStr){
-  document.querySelectorAll(`#${id} input`).forEach((el, i) => {
-    el.addEventListener('input', () => {
-      const ch = Array.from(el.value.trim())[0] || '';
-      el.value = ch; list[i] = ch; if (rebuild) build(); redraw();
-      document.fonts.load(getFontStr(), ch || ' ').then(redraw);
-      saveState();
-    });
+document.querySelectorAll('[data-common]').forEach(el => {
+  el.addEventListener('input', () => {
+    const logicalKey = el.dataset.common;
+    const layerId    = layers[selLayer].id;
+    const map        = LAYER_MAP[layerId];
+    if (logicalKey === 'color') {
+      P[map.color] = el.value; redraw();
+    } else if (logicalKey === 'letters') {
+      const chars = Array.from(el.value);
+      if (layerId === 'division') {
+        GLYPHS.length = 0; chars.forEach(ch => GLYPHS.push(ch));
+        document.fonts.load(`${P.weight} 20px "${P.font}"`, el.value || ' ').then(redraw);
+        build(); redraw();
+      } else if (layerId === 'amr') {
+        AMR.length = 0; chars.forEach(ch => AMR.push(ch));
+        document.fonts.load(`${P.amrWeight} 20px "${P.amrFont}"`, el.value || ' ').then(redraw);
+        redraw();
+      } else {
+        P.fText = el.value; redraw();
+      }
+    } else if (logicalKey === 'font') {
+      P[map.font] = el.value; loadFont(P[map.font]); populateWeightSelectCommon(layerId);
+    } else if (logicalKey === 'weight') {
+      P[map.weight] = parseInt(el.value, 10); redraw();
+    } else if (logicalKey === 'size') {
+      const cfg = LAYER_COMMON_CFG[layerId].size;
+      P[cfg.key] = parseFloat(el.value);
+      document.getElementById('commonSizev').textContent = Number(P[cfg.key]).toFixed(cfg.fmt);
+      redraw();
+    } else if (logicalKey === 'lineheight') {
+      const cfg = LAYER_COMMON_CFG[layerId].lineheight;
+      P[cfg.key] = parseFloat(el.value);
+      document.getElementById('commonLineHv').textContent = Number(P[cfg.key]).toFixed(cfg.fmt);
+      if (layerId === 'division') build();
+      redraw();
+    } else if (['marginT','marginB','marginL','marginR'].includes(logicalKey)) {
+      const cfg = LAYER_COMMON_CFG[layerId][logicalKey];
+      P[cfg.key] = parseFloat(el.value);
+      const outMap = {marginT:'commonMTv', marginB:'commonMBv', marginL:'commonMLv', marginR:'commonMRv'};
+      document.getElementById(outMap[logicalKey]).textContent = Number(P[cfg.key]).toFixed(cfg.fmt);
+      if (layerId === 'division') build();
+      redraw();
+    }
+    saveState();
   });
-}
-bindGlyphs('glyphsJazz', GLYPHS, true,  () => `${P.weight} 20px "${P.font}"`);
-bindGlyphs('glyphsAmr',  AMR,   false, () => `${P.amrWeight} 20px "${P.amrFont}"`);
-document.getElementById('fText').addEventListener('input', e => { P.fText = e.target.value; redraw(); saveState(); });
+});
 document.getElementById('fNewDir').addEventListener('click', () => {
   P.fSeed = Math.floor(Math.random()*100000); document.getElementById('fSeed').value = P.fSeed; redraw(); saveState();
 });

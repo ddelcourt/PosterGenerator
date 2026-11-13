@@ -46,59 +46,16 @@
     </div>
   </section>
 
-  <!-- Layer 1 palettes, one per concern -->
-  <section class="pal" data-col="R" data-layer="division" data-title="Division">
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
+  <!-- Unified Properties panel -->
+  <section class="pal" id="properties" data-col="R">
+    <div class="pal-bar"><span class="pal-title">Properties</span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
     <div class="pal-b">
-      <div class="seg" id="modeSeg" role="group" aria-label="Division mode">
-        <button type="button" data-mode="0" aria-pressed="true">Halving</button>
-        <button type="button" data-mode="1" aria-pressed="false">Gradient</button>
-      </div>
-      <div class="row wide"><span>Center cell: <output id="minCv">0.4</output> cm</span><input type="range" data-k="minC" min="0.15" max="12" step="0.05" value="0.4"></div>
-      <div class="row wide"><span>Edge cell: <output id="maxCv">20</output> cm</span><input type="range" data-k="maxC" min="0.5" max="50" step="0.5" value="20"></div>
-      <div class="row wide"><span>Border spread: <output id="curvev">0.5</output></span><input type="range" data-k="curve" min="0.1" max="3" step="0.05" value="0.5"></div>
-      <label class="chk"><input type="checkbox" data-k="lines"><span>Show cell division</span></label>
-    </div>
-  </section>
 
-  <section class="pal" data-col="R" data-layer="division" data-title="Animation">
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <label class="chk"><input type="checkbox" id="anim"><span>Animate center, edge and falloff</span></label>
-      <div class="row wide"><span>Speed: <output id="speedv">1</output>×</span><input type="range" id="speed" min="0.25" max="4" step="0.25" value="1"></div>
-    </div>
-  </section>
-
-  <section class="pal" data-col="R" data-layer="division" data-title="Letters">
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <div class="row wide"><span>Characters, in order</span></div>
-      <div class="glyphs" id="glyphsJazz">
-        <input type="text" aria-label="Character 1" value="J" autocomplete="off" spellcheck="false">
-        <input type="text" aria-label="Character 2" value="A" autocomplete="off" spellcheck="false">
-        <input type="text" aria-label="Character 3" value="Z" autocomplete="off" spellcheck="false">
-        <input type="text" aria-label="Character 4" value="Z" autocomplete="off" spellcheck="false">
-      </div>
-      <div class="row"><span>In sequence (%)</span><input type="range" data-k="seq" min="0" max="100" step="5" value="100"></div>
-      <div class="row"><span>Sequence Seed</span><input type="number" data-k="seed" step="1" value="7" id="seed"></div>
-      <button id="shuffle" class="alt">New seed</button>
-      <label class="chk"><input type="checkbox" data-k="letters" checked><span>Show letters</span></label>
-    </div>
-  </section>
-
-  <section class="pal" data-col="R" data-layer="division" data-title="Colors">
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <div class="row"><span>Letters</span><input type="color" data-k="ink" value="#000000" aria-label="Letter color"></div>
-      <div class="row"><span>Division lines</span><input type="color" data-k="lineColor" value="#cdcdcd" aria-label="Division line color"></div>
-    </div>
-  </section>
-
-  <section class="pal" data-col="R" data-layer="division" data-title="Typography">
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
+      <h3 class="prop-section">Common</h3>
+      <div class="row"><span>Color</span><input type="color" data-common="color" aria-label="Layer color"></div>
+      <div class="row wide"><span>Letters / text</span><input type="text" data-common="letters" autocomplete="off" spellcheck="false" aria-label="Letters or text"></div>
       <div class="row wide"><span>Font</span>
-        <select data-k="font">
+        <select data-common="font">
           <option value="Inter">Inter</option>
           <option value="Special Gothic Expanded One">Special Gothic Expanded One</option>
           <option value="Ultra">Ultra</option>
@@ -107,109 +64,74 @@
           <option value="Cormorant Garamond">Cormorant Garamond</option>
         </select>
       </div>
-      <div class="row wide"><span>Weight</span><select data-k="weight"></select></div>
-      <div class="row wide"><span>Letter fill: <output id="fillv">82</output>%</span><input type="range" data-k="fill" data-fmt="0" min="20" max="100" step="1" value="82"></div>
-      <div class="row wide"><span>Fill curve: <output id="fillExpv">0.0</output></span><input type="range" data-k="fillExp" data-fmt="1" min="0" max="3" step="0.1" value="0"></div>
-    </div>
-  </section>
-
-  <!-- Layer 2 palettes -->
-  <section class="pal" data-col="R" data-layer="amr" data-title="Letters" hidden>
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <div class="row wide"><span>Characters, top to bottom</span></div>
-      <div class="glyphs" id="glyphsAmr">
-        <input type="text" aria-label="Top character" value="A" autocomplete="off" spellcheck="false">
-        <input type="text" aria-label="Middle character" value="M" autocomplete="off" spellcheck="false">
-        <input type="text" aria-label="Bottom character" value="R" autocomplete="off" spellcheck="false">
+      <div class="row wide"><span>Weight</span><select data-common="weight"></select></div>
+      <div class="row wide">
+        <span><span id="commonSizeLbl">Letter fill</span>: <output id="commonSizev">82</output> <span id="commonSizeUnit">%</span></span>
+        <input type="range" data-common="size" min="20" max="100" step="1" value="82">
       </div>
-      <div class="row"><span>Color</span><input type="color" data-k="amrColor" value="#e02020" aria-label="Letter color"></div>
-    </div>
-  </section>
-
-  <section class="pal" data-col="R" data-layer="amr" data-title="Type" hidden>
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <div class="seg" id="fitSeg" role="group" aria-label="Type sizing">
-        <button type="button" data-mode="fit" aria-pressed="false">Fit to thirds</button>
-        <button type="button" data-mode="manual" aria-pressed="true">Manual</button>
+      <div class="row wide">
+        <span><span id="commonLineHLbl">Line height</span>: <output id="commonLineHv">0.00</output> cm</span>
+        <input type="range" data-common="lineheight" min="0" max="130" step="0.5" value="0">
       </div>
-      <div id="typeSliders">
-        <div class="row wide"><span>Font size: <output id="amrSizev">50.00</output> cm</span><input type="range" data-k="amrSize" min="1" max="150" step="0.5" value="50"></div>
-        <div class="row wide"><span>Line height: <output id="amrLinev">42.50</output> cm</span><input type="range" data-k="amrLine" min="1" max="130" step="0.5" value="42.5"></div>
+      <div class="row wide">
+        <span>Top: <output id="commonMTv">0.00</output> cm</span>
+        <input type="range" data-common="marginT" min="0" max="50" step="0.5" value="0">
       </div>
-    </div>
-  </section>
-
-  <section class="pal" data-col="R" data-layer="amr" data-title="Margins" hidden>
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <div class="row wide"><span>Used when Type is set to Fit to thirds.</span></div>
-      <div class="row wide"><span>Top and bottom: <output id="amrMvv">2.50</output> cm</span><input type="range" data-k="amrMv" min="0" max="20" step="0.5" value="2.5"></div>
-      <div class="row wide"><span>Left and right: <output id="amrMhv">5.00</output> cm</span><input type="range" data-k="amrMh" min="0" max="40" step="0.5" value="5"></div>
-    </div>
-  </section>
-
-  <section class="pal" data-col="R" data-layer="amr" data-title="Typography" hidden>
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <div class="row wide"><span>Font</span>
-        <select data-k="amrFont">
-          <option value="Inter">Inter</option>
-          <option value="Special Gothic Expanded One">Special Gothic Expanded One</option>
-          <option value="Ultra">Ultra</option>
-          <option value="BioRhyme Expanded">BioRhyme Expanded</option>
-          <option value="Caprasimo">Caprasimo</option>
-          <option value="Cormorant Garamond">Cormorant Garamond</option>
-        </select>
+      <div class="row wide">
+        <span>Bottom: <output id="commonMBv">0.00</output> cm</span>
+        <input type="range" data-common="marginB" min="0" max="50" step="0.5" value="0">
       </div>
-      <div class="row wide"><span>Weight</span><select data-k="amrWeight"></select></div>
-    </div>
-  </section>
-
-  <!-- Layer 3 palettes -->
-  <section class="pal" data-col="R" data-layer="festival" data-title="Text" hidden>
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <div class="row wide"><span>Word, repeated on 5 rows</span><input type="text" class="txt" id="fText" value="FESTIVAL" autocomplete="off" spellcheck="false" aria-label="Word"></div>
-      <div class="row wide"><span>Font size: <output id="fSizev">22.00</output> cm</span><input type="range" data-k="fSize" min="1" max="120" step="0.5" value="22"></div>
-      <div class="row wide"><span>Space between repeats: <output id="fGapv">6.00</output> cm</span><input type="range" data-k="fGap" min="0" max="80" step="0.5" value="6"></div>
-      <div class="row"><span>Color</span><input type="color" data-k="fColor" value="#1f3bd8" aria-label="Text color"></div>
-    </div>
-  </section>
-
-  <section class="pal" data-col="R" data-layer="festival" data-title="Typography" hidden>
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <div class="row wide"><span>Font</span>
-        <select data-k="fFont">
-          <option value="Inter">Inter</option>
-          <option value="Special Gothic Expanded One">Special Gothic Expanded One</option>
-          <option value="Ultra">Ultra</option>
-          <option value="BioRhyme Expanded">BioRhyme Expanded</option>
-          <option value="Caprasimo">Caprasimo</option>
-          <option value="Cormorant Garamond">Cormorant Garamond</option>
-        </select>
+      <div class="row wide">
+        <span>Left: <output id="commonMLv">0.00</output> cm</span>
+        <input type="range" data-common="marginL" min="0" max="50" step="0.5" value="0">
       </div>
-      <div class="row wide"><span>Weight</span><select data-k="fWeight"></select></div>
-    </div>
-  </section>
+      <div class="row wide">
+        <span>Right: <output id="commonMRv">0.00</output> cm</span>
+        <input type="range" data-common="marginR" min="0" max="50" step="0.5" value="0">
+      </div>
 
-  <section class="pal" data-col="R" data-layer="festival" data-title="Margins" hidden>
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <div class="row wide"><span>Top: <output id="fMtv">6.00</output> cm</span><input type="range" data-k="fMt" min="0" max="50" step="0.5" value="6"></div>
-      <div class="row wide"><span>Bottom: <output id="fMbv">6.00</output> cm</span><input type="range" data-k="fMb" min="0" max="50" step="0.5" value="6"></div>
-    </div>
-  </section>
+      <div class="prop-sep"></div>
 
-  <section class="pal" data-col="R" data-layer="festival" data-title="Animation" hidden>
-    <div class="pal-bar"><span class="pal-title"></span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <label class="chk"><input type="checkbox" data-k="fPlay" checked><span>Glide</span></label>
-      <div class="row wide"><span>Speed: <output id="fSpeedv">10.00</output> cm/s</span><input type="range" data-k="fSpeed" min="0" max="60" step="0.5" value="10"></div>
-      <div class="row"><span>Direction seed</span><input type="number" data-k="fSeed" step="1" value="3" id="fSeed"></div>
-      <button id="fNewDir" class="alt">New directions</button>
+      <!-- Jazz layer controls -->
+      <div id="layer-props-division">
+        <h3 class="prop-section prop-layer-title">Jazz</h3>
+        <div class="seg" id="modeSeg" role="group" aria-label="Division mode">
+          <button type="button" data-mode="0" aria-pressed="true">Halving</button>
+          <button type="button" data-mode="1" aria-pressed="false">Gradient</button>
+        </div>
+        <div class="row wide"><span>Center cell: <output id="minCv">0.4</output> cm</span><input type="range" data-k="minC" min="0.15" max="12" step="0.05" value="0.4"></div>
+        <div class="row wide"><span>Edge cell: <output id="maxCv">20</output> cm</span><input type="range" data-k="maxC" min="0.5" max="50" step="0.5" value="20"></div>
+        <div class="row wide"><span>Border spread: <output id="curvev">0.5</output></span><input type="range" data-k="curve" min="0.1" max="3" step="0.05" value="0.5"></div>
+        <label class="chk"><input type="checkbox" data-k="lines"><span>Show cell division</span></label>
+        <label class="chk"><input type="checkbox" data-k="letters" checked><span>Show letters</span></label>
+        <div class="row wide"><span>Fill curve: <output id="fillExpv">0.0</output></span><input type="range" data-k="fillExp" data-fmt="1" min="0" max="3" step="0.1" value="0"></div>
+        <div class="row"><span>Division lines</span><input type="color" data-k="lineColor" value="#cdcdcd" aria-label="Division line color"></div>
+        <div class="row wide"><span>In sequence: <output id="seqv">100</output>%</span><input type="range" data-k="seq" data-fmt="0" min="0" max="100" step="5" value="100"></div>
+        <div class="row"><span>Sequence seed</span><input type="number" data-k="seed" step="1" value="7" id="seed"></div>
+        <button id="shuffle" class="alt">New seed</button>
+        <label class="chk"><input type="checkbox" id="anim"><span>Animate division</span></label>
+        <div class="row wide"><span>Anim speed: <output id="speedv">1</output>×</span><input type="range" id="speed" min="0.25" max="4" step="0.25" value="1"></div>
+      </div>
+
+      <!-- AMR layer controls -->
+      <div id="layer-props-amr" hidden>
+        <h3 class="prop-section prop-layer-title">AMR</h3>
+        <div class="seg" id="fitSeg" role="group" aria-label="Type sizing">
+          <button type="button" data-mode="fit" aria-pressed="false">Fit to rows</button>
+          <button type="button" data-mode="manual" aria-pressed="true">Manual</button>
+        </div>
+      </div>
+
+      <!-- Festival layer controls -->
+      <div id="layer-props-festival" hidden>
+        <h3 class="prop-section prop-layer-title">Festival</h3>
+        <div class="row wide"><span>Space between repeats: <output id="fGapv">6.00</output> cm</span><input type="range" data-k="fGap" min="0" max="80" step="0.5" value="6"></div>
+        <label class="chk"><input type="checkbox" data-k="fPlay" checked><span>Glide</span></label>
+        <div class="row wide"><span>Speed: <output id="fSpeedv">10.00</output> cm/s</span><input type="range" data-k="fSpeed" min="0" max="60" step="0.5" value="10"></div>
+        <div class="row"><span>Direction seed</span><input type="number" data-k="fSeed" step="1" value="3" id="fSeed"></div>
+        <button id="fNewDir" class="alt">New directions</button>
+      </div>
+
     </div>
   </section>
 

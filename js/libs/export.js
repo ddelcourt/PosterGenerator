@@ -112,7 +112,8 @@ async function buildSVGOutlined() {
       const font = await loadOpentypeFont(P.fFont, P.fWeight);
       if (!font) { body += L.svg(); continue; }
       const { text, rows } = festItems();
-      let out = `<clipPath id="festival-clip"><rect width="${P.w}" height="${P.h}"/></clipPath>\n`;
+      const fv = v => +v.toFixed(4);
+      let out = `<clipPath id="festival-clip"><rect x="${fv(P.fMl)}" y="0" width="${fv(P.w - P.fMl - P.fMr)}" height="${fv(P.h)}"/></clipPath>\n`;
       out += `<g id="layer-festival" clip-path="url(#festival-clip)" fill="${P.fColor}">`;
       for (const r of rows)
         for (const x of r.xs)
