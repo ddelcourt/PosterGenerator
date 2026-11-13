@@ -1,50 +1,18 @@
-/**
- * Theme Management
- * Handles light/dark mode switching and persistence
- */
+// ============ THEME ============
+// Restores the saved theme and wires up the toggle button.
+(function() {
+  const btn  = document.getElementById('themeToggle');
+  const body = document.querySelector('body');
 
-const Theme = (() => {
-  const THEME_KEY = 'theme';
-  const THEMES = {
-    LIGHT: 'light',
-    DARK: 'dark'
-  };
-
-  const init = () => {
-    const saved = localStorage.getItem(THEME_KEY) || THEMES.LIGHT;
-    set(saved);
-  };
-
-  const set = (theme) => {
-    const body = document.querySelector('body');
-    const isValid = Object.values(THEMES).includes(theme);
-    theme = isValid ? theme : THEMES.LIGHT;
-    
+  const apply = theme => {
     body.setAttribute('data-appearance', theme);
-    localStorage.setItem(THEME_KEY, theme);
-    
-    const btn = document.getElementById('themeToggle');
-    if (btn) {
-      btn.textContent = theme === THEMES.DARK ? '☀️ Light' : '🌙 Dark';
-    }
+    btn.textContent = theme === 'dark' ? '🌙 Dark' : '☀️ Light';
+    localStorage.setItem('theme', theme);
   };
 
-  const toggle = () => {
-    const body = document.querySelector('body');
-    const current = body.getAttribute('data-appearance') || THEMES.LIGHT;
-    const next = current === THEMES.DARK ? THEMES.LIGHT : THEMES.DARK;
-    set(next);
-  };
+  apply(localStorage.getItem('theme') || 'light');
 
-  const get = () => {
-    return document.querySelector('body').getAttribute('data-appearance') || THEMES.LIGHT;
-  };
-
-  return {
-    init,
-    set,
-    toggle,
-    get,
-    THEMES
-  };
+  btn.addEventListener('click', () => {
+    apply(body.getAttribute('data-appearance') === 'dark' ? 'light' : 'dark');
+  });
 })();

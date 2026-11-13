@@ -1,151 +1,62 @@
-/**
- * localStorage & URL Parameter Integration
- * Handles persistent state management and shareable URLs
- */
+// ============ STORAGE ============
+// Persistence via localStorage. All functions rely on globals from app.js (P, GLYPHS, AMR, etc.)
 
-const Storage = (() => {
-  const STORAGE_KEY = 'jazz-poster-state';
+function saveState() {
+  P.glyphs    = [...GLYPHS];
+  P.amrChars  = [...AMR];
+  localStorage.setItem('jazz-poster-state', JSON.stringify(P));
+}
 
-  /**
-   * Parse URL parameters and return as object
-   * Usage: ?w=89.5&h=128&seed=7&bg=%23ffffff
-   */
-  const parseURLParams = () => {
-    const params = new URLSearchParams(window.location.search);
-    const result = {};
-    
-    for (const [key, value] of params.entries()) {
-      // Try to parse as number
-      if (!isNaN(value) && value !== '') {
-        result[key] = +value;
-      }
-      // Try to parse as boolean
-      else if (value === 'true') {
-        result[key] = true;
-      } else if (value === 'false') {
-        result[key] = false;
-      }
-      // Keep as string
-      else {
-        result[key] = decodeURIComponent(value);
-      }
+function syncUIFromP() {
+  initWeightSelects();
+  document.querySelectorAll('[data-k]').forEach(el => {
+    const v = P[el.dataset.k];
+    if (v === undefined) return;
+    if (el.type === 'checkbox') el.checked = !!v;
+    else if (el.type === 'color') el.value = v;
+    else el.value = v;
+    if (el.type === 'range') {
+      const o = document.getElementById(el.dataset.k + 'v');
+      if (o) { const dp = el.dataset.fmt != null ? +el.dataset.fmt : 2; o.textContent = Number(v).toFixed(dp); }
     }
-    
-    return result;
-  };
+  });
+  const fTextEl = document.getElementById('fText');
+  if (fTextEl) fTextEl.value = P.fText;
+  document.querySelectorAll('#modeSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', (b.dataset.mode === '1') === !!P.grad));
+  document.querySelectorAll('#fitSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', (b.dataset.mode === 'fit') === !!P.amrFit));
+  document.querySelectorAll('#typeSliders input').forEach(i => i.disabled = !!P.amrFit);
+  if (Array.isArray(P.glyphs)) {
+    P.glyphs.forEach((ch, i) => { if (i < GLYPHS.length) GLYPHS[i] = ch; });
+    document.querySelectorAll('#glyphsJazz input').forEach((el, i) => { el.value = GLYPHS[i] || ''; });
+  }
+  if (Array.isArray(P.amrChars)) {
+    P.amrChars.forEach((ch, i) => { if (i < AMR.length) AMR[i] = ch; });
+    document.querySelectorAll('#glyphsAmr input').forEach((el, i) => { el.value = AMR[i] || ''; });
+  }
+  updateLoop();
+}
 
-  /**
-   * Generate shareable URL with current state
-   */
-  const generateShareURL = (state) => {
-    const params = new URLSearchParams();
-    
-    Object.entries(state).forEach(([key, value]) => {
-      if (typeof value === 'string' && value.startsWith('#')) {
-        params.set(key, value);
-      } else {
-        params.set(key, value.toString());
-      }
-    });
-    
-    const baseURL = window.location.origin + window.location.pathname;
-    return baseURL + '?' + params.toString();
-  };
+function loadState() {
+  const saved = localStorage.getItem('jazz-poster-state');
+  if (saved) {
+    try { Object.assign(P, JSON.parse(saved)); } catch(e) {}
+  }
+  syncUIFromP();
+}
 
-  /**
-   * Copy share URL to clipboard
-   */
-  const copyShareURL = (state) => {
-    const url = generateShareURL(state);
-    navigator.clipboard.writeText(url).then(() => {
-      console.log('✓ Share URL copied to clipboard');
-      return true;
-    }).catch(err => {
-      console.error('Failed to copy URL:', err);
-      return false;
-    });
-  };
+function exportJSON() {
+  P.glyphs   = [...GLYPHS];
+  P.amrChars = [...AMR];
+  return JSON.stringify(P, null, 2);
+}
 
-  return {
-    /**
-     * Save state to localStorage
-     */
-    save: (state) => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    },
-
-    /**
-     * Load state from localStorage
-     */
-    load: () => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : null;
-    },
-
-    /**
-     * Load state from URL parameters (takes precedence over localStorage)
-     */
-    loadFromURL: () => {
-      return parseURLParams();
-    },
-
-    /**
-     * Initialize state: URL params > localStorage > defaults
-     */
-    initialize: (defaults) => {
-      const urlParams = parseURLParams();
-      const savedState = Storage.load() || {};
-      
-      // Merge: defaults < localStorage < URL params
-      const state = { ...defaults, ...savedState, ...urlParams };
-      
-      return state;
-    },
-
-    /**
-     * Export state as JSON string
-     */
-    exportJSON: (state) => {
-      return JSON.stringify(state, null, 2);
-    },
-
-    /**
-     * Import state from JSON string
-     */
-    importJSON: (json) => {
-      try {
-        return JSON.parse(json);
-      } catch (e) {
-        throw new Error('Invalid JSON: ' + e.message);
-      }
-    },
-
-    /**
-     * Generate shareable URL
-     */
-    getShareURL: (state) => {
-      return generateShareURL(state);
-    },
-
-    /**
-     * Copy share URL to clipboard
-     */
-    copyShareURL: (state) => {
-      return copyShareURL(state);
-    },
-
-    /**
-     * Clear localStorage
-     */
-    clear: () => {
-      localStorage.removeItem(STORAGE_KEY);
-    },
-
-    /**
-     * Get current URL without parameters
-     */
-    getBaseURL: () => {
-      return window.location.origin + window.location.pathname;
-    }
-  };
-})();
+function importJSON(json) {
+  try {
+    Object.assign(P, JSON.parse(json));
+    syncUIFromP();
+    build(); redraw();
+    saveState();
+  } catch(e) { alert('Invalid JSON'); }
+}
