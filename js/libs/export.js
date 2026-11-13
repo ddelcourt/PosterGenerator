@@ -14,10 +14,17 @@ function saveFile(filename, blob){
   } catch(e) { msg.textContent = 'Could not save ' + filename + '.'; }
 }
 
-function buildSVG(){
+function buildSVG() {
+  const selL = layers[selLayer];
+  const svgs = layers.map(L => {
+    if (!L.visible) return '';
+    if (L.params) loadLayerParams(L);
+    return L.svg();
+  });
+  if (selL) loadLayerParams(selL);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${P.w}cm" height="${P.h}cm" viewBox="0 0 ${P.w} ${P.h}">\n` +
     `<rect width="${P.w}" height="${P.h}" fill="${P.bg}"/>\n` +
-    layers.map(L => L.visible ? L.svg() : '').join('') + '</svg>';
+    svgs.join('') + '</svg>';
 }
 
 document.getElementById('save').addEventListener('click', () =>
@@ -68,14 +75,20 @@ function textPathData(font, text, x, y, size, center = false) {
 }
 
 async function buildSVGOutlined() {
+  const selL = layers[selLayer];
   const f = v => +v.toFixed(4);
   let body = '';
 
   for (const L of layers) {
     if (!L.visible) continue;
+    if (L.params) loadLayerParams(L);  // load this layer's own params into P / GLYPHS / AMR
 
-    if (L.id === 'division') {
-      let out = '<g id="layer-division">\n';
+    if (L.moduleId === 'division') {
+      // ensure cells are built from this layer's params
+      const divMod = _modules.find(m => m.id === 'division');
+      if (divMod && typeof divMod.build === 'function') divMod.build();
+
+      let out = `<g id="layer-${L.id}">\n`;
       if (P.lines) {
         out += `<g id="division" fill="none" stroke="${P.lineColor}" stroke-width="0.02">` +
           cells.map(c => `<rect x="${f(c.x)}" y="${f(c.y)}" width="${f(c.w)}" height="${f(c.h)}"/>`).join('') + '</g>\n';
@@ -100,27 +113,29 @@ async function buildSVGOutlined() {
       }
       body += out + '</g>\n';
 
-    } else if (L.id === 'amr') {
+    } else if (L.moduleId === 'amr') {
       const font = await loadOpentypeFont(P.amrFont, P.amrWeight);
       if (!font) { body += L.svg(); continue; }
-      let out = `<g id="layer-amr" fill="${P.amrColor}">`;
+      let out = `<g id="layer-${L.id}" fill="${P.amrColor}">`;
       for (const it of amrItems())
         out += `<path d="${textPathData(font, it.ch, it.x, it.y, it.s, true)}"/>`;
       body += out + '</g>\n';
 
-    } else if (L.id === 'festival') {
+    } else if (L.moduleId === 'festival') {
       const font = await loadOpentypeFont(P.fFont, P.fWeight);
       if (!font) { body += L.svg(); continue; }
       const { text, rows } = festItems();
       const fv = v => +v.toFixed(4);
-      let out = `<clipPath id="festival-clip"><rect x="${fv(P.fMl)}" y="0" width="${fv(P.w - P.fMl - P.fMr)}" height="${fv(P.h)}"/></clipPath>\n`;
-      out += `<g id="layer-festival" clip-path="url(#festival-clip)" fill="${P.fColor}">`;
+      let out = `<clipPath id="festival-clip-${L.id}"><rect x="${fv(P.fMl)}" y="0" width="${fv(P.w - P.fMl - P.fMr)}" height="${fv(P.h)}"/></clipPath>\n`;
+      out += `<g id="layer-${L.id}" clip-path="url(#festival-clip-${L.id})" fill="${P.fColor}">`;
       for (const r of rows)
         for (const x of r.xs)
           out += `<path d="${textPathData(font, text, x, r.y, P.fSize)}"/>`;
       body += out + '</g>\n';
     }
   }
+
+  if (selL) loadLayerParams(selL);  // restore selected layer params after export
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${P.w}cm" height="${P.h}cm" viewBox="0 0 ${P.w} ${P.h}">\n` +
     `<rect width="${P.w}" height="${P.h}" fill="${P.bg}"/>\n` +

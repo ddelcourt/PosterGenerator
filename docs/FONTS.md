@@ -39,10 +39,9 @@ Before the first render, the app calls `document.fonts.load(...)` for each weigh
 
 1. Add the TTF file to `/fonts/` using the `family-weight.ttf` naming pattern.
 2. Add the matching `@font-face` rule to `css/fonts.css`.
-3. In `index.html`, update:
-   - `FONT_FAMILIES` array — add the family name.
-   - `FONT_WEIGHTS` object — add the family and its available weights.
-   - `FONT_FILES` object — add the family and its `weight → filename` mapping (this is what the SVG outline exporter uses to fetch the TTF at export time).
+3. In `js/app.js`, update:
+   - `FONT_WEIGHTS` object — add the family and its available weight numbers.
+   - `FONT_FILES` object — add the family and its `weight → filename` mapping (used by the SVG outline exporter to fetch the TTF at export time).
 
 ---
 

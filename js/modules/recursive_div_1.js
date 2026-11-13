@@ -18,6 +18,9 @@ const _animPhase = {};
 // Called during animation; elements may be absent when a different layer is selected.
 function setParam(k, v) {
   P[k] = v;
+  if (typeof layers !== 'undefined') {
+    layers.forEach(l => { if (l.moduleId === 'division' && l.params && k in l.params) l.params[k] = v; });
+  }
   const el = document.querySelector(`[data-k="${k}"]`);
   if (el) el.value = v;
   const out = document.getElementById(k + 'v');
@@ -252,6 +255,7 @@ function _addColor(container, key, label) {
 // ============ REGISTER ============
 window.AMRApp.registerModule({
   id: 'division',
+  patch: 'recursive_div_1',
   name: 'Jazz',
 
   defaults: {
@@ -283,7 +287,10 @@ window.AMRApp.registerModule({
 
   layers: [{
     id: 'division', name: 'Jazz', visible: true, cached: true,
-    key: () => [cellsVer, P.lines, P.letters, P.ink, P.lineColor, P.font, P.weight, P.fill, P.fillExp].join(),
+    key: () => [P.w, P.h, P.seed, P.seq, P.minC, P.maxC, P.curve,
+                P.jMt, P.jMb, P.jMl, P.jMr, P.jLineH,
+                P.glyphs ? P.glyphs.join('') : GLYPHS.join(''),
+                P.lines, P.letters, P.ink, P.lineColor, P.font, P.weight, P.fill, P.fillExp].join('|'),
     draw: _draw,
     svg:  _svg
   }],

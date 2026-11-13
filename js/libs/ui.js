@@ -33,6 +33,21 @@ document.getElementById('resetLayout').addEventListener('click', () => {
   autoLayout();
 });
 
+// ---- Fullscreen button ----
+const ICON_EXPAND   = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4"/></svg>`;
+const ICON_COMPRESS = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 1v4H1M15 5h-4V1M11 15v-4h4M1 11h4v4"/></svg>`;
+
+function toggleFullscreen() {
+  document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+}
+
+document.getElementById('fullscreenToggle').addEventListener('click', toggleFullscreen);
+
+document.addEventListener('fullscreenchange', () => {
+  document.getElementById('fullscreenToggle').innerHTML =
+    document.fullscreenElement ? ICON_COMPRESS : ICON_EXPAND;
+});
+
 // ---- Keyboard shortcuts ----
 let uiVisible = true;
 document.addEventListener('keydown', e => {
@@ -46,7 +61,7 @@ document.addEventListener('keydown', e => {
     );
     if (!inText) {
       e.preventDefault();
-      document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+      toggleFullscreen();
     }
   }
   // Tab: toggle UI panels (palettes + top buttons)

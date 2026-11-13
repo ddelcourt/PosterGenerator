@@ -61,6 +61,7 @@ function buildUI(container) {
 // ============ REGISTER ============
 window.AMRApp.registerModule({
   id: 'amr',
+  patch: 'title_vertical',
   name: 'AMR',
 
   defaults: {

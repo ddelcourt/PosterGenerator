@@ -76,7 +76,7 @@ function loadFont(family) {
 window.AMRApp = {
   registerModule(def) {
     if (def.defaults) Object.assign(P, def.defaults);
-    if (def.layers)   def.layers.forEach(L => layers.push(L));
+    if (def.layers)   def.layers.forEach(L => { L.moduleId = def.id; L.params = { ...(def.defaults || {}) }; layers.push(L); });
     if (def.params) {
       def.params.forEach(p => {
         if (p.type === 'font' && p.linkedWeight) {
@@ -101,13 +101,18 @@ const _FIT_KEYS = new Set(['w', 'h']);
 
 function dispatch(key, value) {
   P[key] = value;
+  const _cl = layers[selLayer];
+  if (_cl && _cl.params && key in _cl.params) _cl.params[key] = value;
   updateParamUI(key, value);
+  if (_modules.some(m => m.params && m.params.some(p => p.type === 'text' && p.key === key)))
+    updateLayerNames();
 
   // Font → weight linking: repopulate the weight select for the new family.
   if (key in FONT_TO_WEIGHT) {
     const wKey    = FONT_TO_WEIGHT[key];
     const snapped = nearestWeight(value, P[wKey]);
     P[wKey] = snapped;
+    if (_cl && _cl.params && wKey in _cl.params) _cl.params[wKey] = snapped;
     loadFont(value);
     const wSel = document.querySelector(`[data-k="${wKey}"]`);
     if (wSel && wSel.tagName === 'SELECT') {
@@ -155,10 +160,28 @@ function updateParamUI(key, value) {
 // ============ PROPERTIES PANE ============
 // Clears and rebuilds the Properties pane content for the given layer.
 function renderProperties(layerId) {
-  const mod = _modules.find(m => m.layers && m.layers.some(L => L.id === layerId));
-  if (!mod) return;
+  const layer = layers.find(L => L.id === layerId);
+  const mod = layer ? _modules.find(m => m.id === layer.moduleId) : null;
   const container = document.querySelector('#properties .pal-b');
   container.innerHTML = '';
+  if (!mod) return;
+
+  // Type selector — allows switching this layer to any registered module
+  const layerIdx = layers.indexOf(layer);
+  const typeRow = _el('div', 'row wide');
+  const typeLabel = _el('span'); typeLabel.textContent = 'Type';
+  const typeSel = document.createElement('select');
+  _modules.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id; opt.textContent = m.name;
+    opt.selected = (m.id === layer.moduleId);
+    typeSel.appendChild(opt);
+  });
+  typeSel.addEventListener('change', () => setLayerModule(layerIdx, typeSel.value));
+  typeRow.append(typeLabel, typeSel);
+  container.appendChild(typeRow);
+  container.insertAdjacentHTML('beforeend', '<div class="prop-sep"></div>');
+
   if (mod.params) mod.params.forEach(p => _renderParam(p, container));
   if (typeof mod.buildUI === 'function') mod.buildUI(container, window.AMRApp);
 }
@@ -226,6 +249,8 @@ function _rWeight({ key, label }, c) {
   const avail   = FONT_WEIGHTS[family] || [400];
   const snapped = nearestWeight(family, P[key] || 400);
   P[key] = snapped;
+  const _cl = layers[selLayer];
+  if (_cl && _cl.params && key in _cl.params) _cl.params[key] = snapped;
   const row = _el('div', 'row wide');
   row.innerHTML = `<span>${_esc(label)}</span><select data-k="${_esc(key)}">` +
     avail.map(w => `<option value="${w}"${w === snapped ? ' selected' : ''}>${w} \u2014 ${WEIGHT_NAMES[w] || w}</option>`).join('') +
@@ -383,6 +408,70 @@ function _rMargins({ keys, max, step, unit, fmt }, c) {
 }
 
 // ============ LAYER LIST ============
+function layerDisplayName(L) {
+  const mod = _modules.find(m => m.id === L.moduleId);
+  if (!mod || !mod.params) return L.name;
+  const tp = mod.params.find(p => p.type === 'text');
+  if (!tp) return L.name;
+  const val = (L.params || P)[tp.key];
+  if (val == null) return L.name;
+  const str = typeof tp.format === 'function' ? tp.format(val) : String(val);
+  return str.trim() || L.name;
+}
+
+function updateLayerNames() {
+  document.querySelectorAll('#layerList .layer').forEach(li => {
+    const L = layers[+li.dataset.idx];
+    const btn = li.querySelector('.layer-name');
+    if (L && btn) btn.textContent = layerDisplayName(L);
+  });
+}
+
+function loadLayerParams(L) {
+  if (!L || !L.params) return;
+  Object.assign(P, L.params);
+  if (Array.isArray(P.glyphs))   { GLYPHS.length = 0; P.glyphs.forEach(ch => GLYPHS.push(ch)); }
+  if (Array.isArray(P.amrChars)) { AMR.length = 0; P.amrChars.forEach(ch => AMR.push(ch)); }
+}
+
+function addLayer(moduleId) {
+  const mod = _modules.find(m => m.id === moduleId);
+  if (!mod || !mod.layers || !mod.layers[0]) return;
+  const uid = moduleId + '_' + Date.now();
+  layers.push({ ...mod.layers[0], id: uid, moduleId, params: { ...(mod.defaults || {}) } });
+  selLayer = layers.length - 1;
+  loadLayerParams(layers[selLayer]);
+  if (typeof mod.build === 'function') mod.build();
+  renderLayers(); redraw();
+  if (typeof saveState !== 'undefined') saveState();
+}
+
+function deleteLayer(idx) {
+  layers.splice(idx, 1);
+  if (selLayer >= layers.length) selLayer = Math.max(0, layers.length - 1);
+  if (layers.length > 0) loadLayerParams(layers[selLayer]);
+  renderLayers();
+  if (layers.length > 0) renderProperties(layers[selLayer].id);
+  else document.querySelector('#properties .pal-b').innerHTML = '';
+  redraw();
+  if (typeof saveState !== 'undefined') saveState();
+}
+
+function setLayerModule(idx, newModuleId) {
+  const newMod = _modules.find(m => m.id === newModuleId);
+  if (!newMod || !newMod.layers || !newMod.layers[0]) return;
+  const tmpl = newMod.layers[0];
+  const visible = layers[idx].visible;
+  Object.keys(layers[idx]).forEach(k => { delete layers[idx][k]; });
+  Object.assign(layers[idx], { ...tmpl, moduleId: newModuleId, visible, params: { ...(newMod.defaults || {}) } });
+  if (idx === selLayer) loadLayerParams(layers[idx]);
+  if (typeof newMod.build === 'function') newMod.build();
+  renderLayers();
+  renderProperties(layers[idx].id);
+  redraw();
+  if (typeof saveState !== 'undefined') saveState();
+}
+
 function renderLayers() {
   const ul = document.getElementById('layerList');
   ul.textContent = '';
@@ -403,10 +492,20 @@ function renderLayers() {
     cb.addEventListener('change', () => { L.visible = cb.checked; updateLoop(); redraw(); });
 
     const nm = _el('button'); nm.type = 'button'; nm.className = 'layer-name';
-    nm.textContent = (i + 1) + '  ' + L.name;
-    nm.addEventListener('click', () => { selLayer = i; renderLayers(); });
+    nm.textContent = layerDisplayName(L);
+    nm.addEventListener('click', () => { selLayer = i; loadLayerParams(layers[i]); renderLayers(); });
 
-    li.append(handle, cb, nm); ul.append(li);
+    const mod = _modules.find(m => m.id === L.moduleId);
+    const info = _el('button'); info.type = 'button'; info.className = 'layer-info';
+    info.textContent = 'i'; info.setAttribute('aria-label', 'Patch info');
+    if (mod && mod.patch) info.dataset.tooltip = mod.patch;
+    info.addEventListener('click', e => e.stopPropagation());
+
+    const del = _el('button'); del.type = 'button'; del.className = 'layer-delete';
+    del.textContent = '×'; del.setAttribute('aria-label', 'Delete layer');
+    del.addEventListener('click', e => { e.stopPropagation(); deleteLayer(i); });
+
+    li.append(handle, cb, nm, info, del); ul.append(li);
 
     li.addEventListener('dragstart', e => {
       dragSrc = i; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', i);
@@ -460,8 +559,28 @@ function draw() {
   const k = width / P.w;
   for (const L of layers) {
     if (!L.visible) continue;
+    const mod = L.moduleId ? _modules.find(m => m.id === L.moduleId) : null;
+    const keys = mod && mod.defaults ? Object.keys(mod.defaults) : [];
+    let backup = null, glyphsBak = null, amrBak = null;
+    if (L.params && keys.length) {
+      backup = {}; keys.forEach(k => { backup[k] = P[k]; });
+      glyphsBak = [...GLYPHS]; amrBak = [...AMR];
+      Object.assign(P, L.params);
+      if (Array.isArray(P.glyphs))   { GLYPHS.length = 0; P.glyphs.forEach(ch => GLYPHS.push(ch)); }
+      if (Array.isArray(P.amrChars)) { AMR.length = 0; P.amrChars.forEach(ch => AMR.push(ch)); }
+    }
     if (typeof L.advance === 'function') L.advance();
+    // Per-layer build: rebuild shared module state when this layer's key changes
+    if (L.cached && typeof L.key === 'function' && mod && typeof mod.build === 'function') {
+      const ck = L.key();
+      if (L._preKey !== ck) { mod.build(); L._preKey = ck; L._key = null; }
+    }
     L.cached ? renderCached(L, k) : L.draw(drawingContext, k);
+    if (backup) {
+      keys.forEach(k => { P[k] = backup[k]; });
+      GLYPHS.length = 0; glyphsBak.forEach(ch => GLYPHS.push(ch));
+      AMR.length = 0; amrBak.forEach(ch => AMR.push(ch));
+    }
   }
 }
 
@@ -489,8 +608,10 @@ let zTop = 10;
 
 function autoLayout(onlyUnplaced) {
   if (isMobile()) { palettes.forEach(p => { p.style.left = p.style.top = ''; }); return; }
-  const W = 252, gap = 10, m = 12, maxY = innerHeight - m;
-  const colX = { L: m, R: Math.max(m, innerWidth - m - W) }, colY = { L: m, R: m };
+  const W = 280, gap = 10, m = 12, maxY = innerHeight - m;
+  const topRight = document.getElementById('topRight');
+  const lStartY = topRight ? topRight.getBoundingClientRect().bottom + gap : m;
+  const colX = { L: m, R: Math.max(m, innerWidth - m - W) }, colY = { L: lStartY, R: m };
   if (onlyUnplaced) palettes.forEach(p => {
     if (p.hidden || !p.style.left) return;
     const c = parseFloat(p.style.left) < innerWidth / 2 ? 'L' : 'R';
@@ -524,4 +645,8 @@ document.querySelectorAll('#palettes .pal:not(#properties) [data-k]').forEach(el
     if (!isFinite(v) || v <= 0) return;
     dispatch(k, v);
   });
+});
+
+document.getElementById('addLayerBtn').addEventListener('click', () => {
+  if (_modules.length) addLayer(_modules[0].id);
 });

@@ -72,6 +72,7 @@ function _svg() {
 // ============ REGISTER ============
 window.AMRApp.registerModule({
   id: 'festival',
+  patch: 'gliding_text',
   name: 'Festival',
 
   defaults: {

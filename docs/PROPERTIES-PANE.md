@@ -1,4 +1,99 @@
-# Properties Pane — Architecture Specification
+# Properties Pane — Architecture
+
+## Overview
+
+The **Layer Properties** palette is a single floating panel that dynamically reflects the currently selected layer. It is rebuilt completely every time the selection changes.
+
+---
+
+## Panel Structure
+
+```
+[ Type       ] [ select: Jazz / AMR / Festival ]
+─────────────────────────────────────────────
+[ Common section  — Color, Letters, Font, Weight ]
+[ Module-specific params ]
+[ Module buildUI() output ]
+```
+
+### Type Selector
+
+The first row lets you reassign the current layer's module type at any time. All registered modules are listed; selecting one reinitialises the layer with that module's default parameters.
+
+---
+
+## Per-Layer Parameter Instances
+
+Each layer is an **independent instance** with its own `layer.params` object — a snapshot of all its module's default keys. Layers of the same module type do **not** share parameters.
+
+### How it works
+
+| Event | What happens |
+|-------|--------------|
+| Layer selected | `loadLayerParams(L)` merges `L.params` into global `P` and syncs `GLYPHS`/`AMR` |
+| Param changed (dispatch) | `P[key]` updated, `layers[selLayer].params[key]` updated, UI synced |
+| Layer drawn | Draw loop temporarily swaps `P` to `L.params`, draws, then restores |
+| Layer saved | `layer.params` serialised inside `P.layerDefs` |
+
+### Module-level shared state
+
+Some modules maintain module-level state (e.g. `cells` in `recursive_div_1`, animation offsets in `gliding_text`). The draw loop calls the module's `build()` function per-layer when the layer's cache key changes, ensuring each layer's visual output uses its own params.
+
+---
+
+## Registration
+
+Modules register themselves via `window.AMRApp.registerModule(def)`:
+
+```js
+window.AMRApp.registerModule({
+  id:       'division',          // unique module ID
+  patch:    'recursive_div_1',   // source filename (shown in (i) tooltip)
+  name:     'Jazz',              // display name in Type selector / add-layer button
+  defaults: { seed: 7, ... },    // initial param values, also used to initialise layer.params
+  params:   [ ... ],             // param schema for auto-generated UI
+  buildUI:  fn,                  // optional custom UI injected after auto params
+  build:    fn,                  // optional: called when structural params change
+  onUpdate: fn,                  // optional: called on every dispatch, returns 'build'/'redraw'/'none'
+  layers:   [{ id, name, draw, svg, cached, key, advance, needsLoop }]
+});
+```
+
+---
+
+## Param Types
+
+| Type | Description |
+|------|-------------|
+| `section` | Heading |
+| `sep` | Horizontal divider |
+| `color` | Colour picker |
+| `text` | Text input (supports `format`/`parse` for array values) |
+| `font` | Font family dropdown; `linkedWeight` auto-links to a weight key |
+| `weight` | Font weight dropdown; snapped to available weights for the linked font |
+| `range` | Single slider with live output |
+| `range2` | Dual-thumb slider for `lo`/`hi` range |
+| `number` | Numeric input |
+| `checkbox` | Boolean toggle |
+| `button` | Action button |
+| `seg` | Segmented / radio button group |
+| `margins` | Four sliders for T/B/L/R margin keys |
+
+---
+
+## Storage
+
+Layers are persisted in `localStorage` as `P.layerDefs`:
+
+```json
+"layerDefs": [
+  { "id": "division",          "moduleId": "division", "params": { "seed": 42, ... } },
+  { "id": "amr_1731234567890", "moduleId": "amr",      "params": { "amrColor": "#ff0000", ... } }
+]
+```
+
+On load, `syncUIFromP` rebuilds the `layers` array from `layerDefs`, restoring each layer's `params`. Then `loadLayerParams(layers[selLayer])` syncs `P` to the selected layer before the first render.
+
 
 **Status:** Pre-implementation review  
 **Scope:** Refactor of the layer parameter UI from multiple floating palettes into a single unified Properties panel

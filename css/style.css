@@ -76,11 +76,15 @@ canvas {
 #topRight {
   position: fixed;
   top: 12px;
-  right: 12px;
+  left: 12px;
   z-index: 10;
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+#topRight button {
+  margin: 0;
 }
 
 #themeToggle {
@@ -96,6 +100,24 @@ canvas {
 }
 
 #themeToggle:hover {
+  background: var(--bg-control);
+  border-color: var(--border-focus);
+}
+
+#fullscreenToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+#fullscreenToggle:hover {
   background: var(--bg-control);
   border-color: var(--border-focus);
 }
@@ -166,11 +188,24 @@ canvas {
 }
 
 .pal-toggle::after {
-  content: "⌄";
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 6px solid currentColor;
+  vertical-align: middle;
+  transition: transform 0.15s;
 }
 
 .pal-toggle[aria-expanded="false"]::after {
-  content: "⌞";
+  width: 8px;
+  height: 2px;
+  border: none;
+  background: currentColor;
+  transform: none;
+  transition: none;
 }
 
 .pal-b {
@@ -542,6 +577,126 @@ button.alt:hover {
   color: white;
 }
 
+.layer-info {
+  flex: 0 0 auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: var(--bg-control);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 700;
+  font-style: italic;
+  cursor: default;
+  transition: none;
+  line-height: 1;
+}
+
+.layer-info:hover {
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border-color: var(--border-focus);
+}
+
+.layer-info::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 400;
+  font-style: normal;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.layer-info:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.layer.sel .layer-info {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: white;
+}
+
+.layer.sel .layer-info:hover {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: white;
+}
+
+.layer-delete {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  transition: none;
+}
+
+.layer-delete:hover {
+  background: rgba(200, 40, 40, 0.1);
+  border-color: rgba(200, 40, 40, 0.4);
+  color: #c82828;
+}
+
+.layer.sel .layer-delete {
+  color: rgba(255, 255, 255, 0.6);
+  border-color: transparent;
+}
+
+.layer.sel .layer-delete:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+.add-layer-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.add-layer-btn {
+  flex: 1;
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 12px;
+  justify-content: center;
+}
+
 /* ============ Category Groups ============ */
 
 .category-group {
@@ -562,6 +717,19 @@ button.alt:hover {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0 0 8px;
+}
+
+/* ============ File Pane ============ */
+
+.file-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.file-row button {
+  flex: 1;
+  margin: 0;
 }
 
 /* ============ Message Status ============ */

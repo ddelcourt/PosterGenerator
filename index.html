@@ -12,43 +12,51 @@
 <div id="topRight">
   <button id="resetLayout" class="alt">Reset palette layout</button>
   <button id="themeToggle" aria-label="Toggle between light and dark mode">☀️ Light</button>
+  <button id="fullscreenToggle" aria-label="Toggle fullscreen"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4"/></svg></button>
 </div>
 <div id="palettes">
 
   <section class="pal" data-col="L">
-    <div class="pal-bar"><span class="pal-title">Poster</span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
+    <div class="pal-bar"><span class="pal-title">Canvas Setup</span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
     <div class="pal-b">
       <div class="row"><span>Width (cm)</span><input type="number" data-k="w" min="5" max="300" step="0.5" value="89.5"></div>
       <div class="row"><span>Height (cm)</span><input type="number" data-k="h" min="5" max="300" step="0.5" value="128"></div>
-    </div>
-  </section>
-
-  <section class="pal" data-col="L">
-    <div class="pal-bar"><span class="pal-title">Background</span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b">
-      <div class="row"><span>Color</span><input type="color" data-k="bg" value="#ffffff" aria-label="Background color"></div>
+      <div class="row"><span>Background</span><input type="color" data-k="bg" value="#ffffff" aria-label="Background color"></div>
     </div>
   </section>
 
   <section class="pal" data-col="L">
     <div class="pal-bar"><span class="pal-title">Layers</span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
-    <div class="pal-b"><ul id="layerList" class="layers"></ul></div>
+    <div class="pal-b">
+      <ul id="layerList" class="layers"></ul>
+      <div class="add-layer-row">
+        <button id="addLayerBtn" class="alt">＋ New Layer</button>
+      </div>
+    </div>
   </section>
 
   <section class="pal" data-col="L">
-    <div class="pal-bar"><span class="pal-title">Export</span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
+    <div class="pal-bar"><span class="pal-title">File</span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
     <div class="pal-b">
-      <button id="save">Save PNG</button><button id="saveSvg" class="alt">Save SVG</button>
-      <button id="saveOutlined">Save SVG (Outlined)</button>
-      <button id="exportJson">Export JSON</button><button id="importJson" class="alt">Load JSON</button>
+      <div class="file-row">
+        <button id="save" class="alt">Save PNG</button>
+      </div>
+      <div class="file-row">
+        <button id="saveSvg" class="alt">Save SVG</button>
+        <button id="saveOutlined" class="alt">Save SVG (Outlined)</button>
+      </div>
+      <div class="file-row">
+        <button id="exportJson" class="alt">Export JSON</button>
+        <button id="importJson" class="alt">Load JSON</button>
+      </div>
       <input type="file" id="jsonFile" accept=".json" style="display:none">
       <div id="msg" role="status"></div>
     </div>
   </section>
 
-  <!-- Properties pane — content is generated dynamically by the active layer's module -->
+  <!-- Layer Properties pane — content is generated dynamically by the active layer's module -->
   <section class="pal" id="properties" data-col="R">
-    <div class="pal-bar"><span class="pal-title">Properties</span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
+    <div class="pal-bar"><span class="pal-title">Layer Properties</span><button class="pal-toggle" aria-expanded="true" aria-label="Collapse or expand palette"></button></div>
     <div class="pal-b"></div>
   </section>
 

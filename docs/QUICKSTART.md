@@ -18,6 +18,69 @@ The poster preview fills the centre of the screen. Floating palettes hold all co
 
 ### Layers
 
+The **Layers** palette lists all active layers, painted bottom to top. Each layer is an independent instance with its own parameter set.
+
+| Control | Action |
+|---------|--------|
+| ⠿ drag handle | Reorder layers |
+| ☑ checkbox | Toggle layer visibility |
+| Layer name | Select layer (shows its properties) |
+| ⓘ icon (hover) | Shows the patch filename |
+| × button | Delete the layer |
+| **＋ New Layer** | Add a new layer (defaults to first module; change type in Layer Properties) |
+
+### Layer Properties
+
+The **Layer Properties** palette updates to show the selected layer's parameters. Use the **Type** dropdown at the top to reassign the layer to a different module type.
+
+### Export (File palette)
+
+| Button | Output |
+|--------|--------|
+| Save PNG | Raster image at screen resolution |
+| Save SVG | Vector file with live text |
+| Save SVG (Outlined) | Vector file with text converted to paths |
+| Export JSON | Settings snapshot |
+| Load JSON | Restore from snapshot |
+
+See [EXPORT.md](EXPORT.md) for full details on each format.
+
+---
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| **Enter** | Toggle fullscreen |
+| **Tab** | Show / hide all palettes |
+
+---
+
+## Saving Your Work
+
+Changes are saved automatically to browser localStorage. Closing and reopening the browser restores the last state, including all layers and their individual parameter sets.
+
+For a portable backup, use **Export JSON**.
+
+
+## Running the App
+
+A local HTTP server is required — browsers block font loading from `file://`.
+
+```bash
+python3 -m http.server 8000
+```
+
+Open **http://localhost:8000** in your browser.
+
+---
+
+## Interface
+
+The poster preview fills the centre of the screen. Floating palettes hold all controls and can be dragged by their title bars.
+
+### Layers
+
 Three layers compose the poster, painted bottom to top:
 
 | Layer | Description |

@@ -94,22 +94,38 @@ Text is converted to filled `<path>` shapes before export. The resulting SVG has
 
 ## Export JSON / Load JSON
 
-Saves all current parameter values as a JSON file:
+Saves all current parameters and the full layer configuration as a JSON file. Each layer carries its own independent parameter set:
 
 ```json
 {
   "w": 89.5,
   "h": 128,
-  "seed": 7,
-  "font": "Inter",
-  "weight": 600,
-  "amrColor": "#e02020",
-  "fText": "FESTIVAL",
-  ...
+  "bg": "#ffffff",
+  "layerDefs": [
+    {
+      "id": "division",
+      "moduleId": "division",
+      "params": { "seed": 7, "ink": "#000000", "font": "Inter", "weight": 600, "glyphs": ["J","A","Z","Z"], "..." : "..." }
+    },
+    {
+      "id": "amr",
+      "moduleId": "amr",
+      "params": { "amrColor": "#e02020", "amrFont": "Inter", "amrWeight": 600, "..." : "..." }
+    },
+    {
+      "id": "festival",
+      "moduleId": "festival",
+      "params": { "fText": "FESTIVAL", "fColor": "#1f3bd8", "fSize": 22, "..." : "..." }
+    }
+  ],
+  "selLayer": 0,
+  "layerVisibility": { "division": true, "amr": true, "festival": true }
 }
 ```
 
-Importing a JSON file restores all parameters and triggers a full redraw. Use this for:
+Each layer in `layerDefs` stores its `moduleId` (which module drives it) and its full `params` snapshot. Multiple layers of the same module type are fully supported — each with its own `id` and `params`.
+
+Importing a JSON file restores all layers, their types, and their individual parameters, then triggers a full redraw. Use this for:
 
 - Versioning designs (save snapshots at different stages).
 - Sharing a configuration without opening the app.
