@@ -132,6 +132,8 @@ async function buildSVGOutlined() {
         for (const x of r.xs)
           out += `<path d="${textPathData(font, text, x, r.y, P.fSize)}"/>`;
       body += out + '</g>\n';
+    } else {
+      body += L.svg();
     }
   }
 

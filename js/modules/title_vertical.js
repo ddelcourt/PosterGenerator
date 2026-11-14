@@ -38,24 +38,6 @@ function buildUI(container) {
   h.className = 'prop-section prop-layer-title';
   h.textContent = 'AMR';
   container.appendChild(h);
-
-  // Fit / Manual segmented control.
-  // data-mode="fit"/"manual" matches the selector in storage.js's syncUIFromP.
-  const seg = document.createElement('div');
-  seg.className = 'seg'; seg.id = 'fitSeg';
-  seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', 'Type sizing');
-  [{ mode: 'fit', label: 'Fit to rows', fit: true }, { mode: 'manual', label: 'Manual', fit: false }].forEach(opt => {
-    const btn = document.createElement('button');
-    btn.type = 'button'; btn.dataset.mode = opt.mode; btn.textContent = opt.label;
-    btn.setAttribute('aria-pressed', String(!!P.amrFit === opt.fit));
-    btn.addEventListener('click', () => {
-      seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
-      btn.setAttribute('aria-pressed', 'true');
-      dispatch('amrFit', opt.fit);
-    });
-    seg.appendChild(btn);
-  });
-  container.appendChild(seg);
 }
 
 // ============ REGISTER ============
@@ -81,12 +63,18 @@ window.AMRApp.registerModule({
       parse:  v => Array.from(v) },
     { type: 'font',   key: 'amrFont',   label: 'Font',   linkedWeight: 'amrWeight' },
     { type: 'weight', key: 'amrWeight', label: 'Weight', linkedFont:   'amrFont'   },
+    { type: 'margins', keys: { T: 'amrMt', B: 'amrMb', L: 'amrMl', R: 'amrMr' }, max: 50, step: 0.5, unit: 'cm', fmt: 2 },
+    { type: 'sep' },
+    { type: 'seg',    key: 'amrFit', groupId: 'fitSeg', label: 'Type sizing',
+      options: [
+        { label: 'Fit to rows', value: true,  dataMode: 'fit'    },
+        { label: 'Manual',      value: false, dataMode: 'manual' }
+      ]
+    },
     { type: 'range',  key: 'amrSize',   label: 'Font size',   min: 1, max: 150, step: 0.5, unit: 'cm', fmt: 2,
       disabled: P => P.amrFit },
     { type: 'range',  key: 'amrLine',   label: 'Line height', min: 1, max: 130, step: 0.5, unit: 'cm', fmt: 2,
       disabled: P => P.amrFit },
-    { type: 'margins', keys: { T: 'amrMt', B: 'amrMb', L: 'amrMl', R: 'amrMr' }, max: 50, step: 0.5, unit: 'cm', fmt: 2 },
-    { type: 'sep' }
   ],
 
   buildUI,

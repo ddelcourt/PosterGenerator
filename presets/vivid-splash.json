@@ -1,0 +1,48 @@
+{
+  "w": 89.5, "h": 128, "bg": "#fdf5e6",
+  "glyphs": ["J","A","Z","Z"], "amrChars": ["A","M","R"],
+  "minC": 0.6, "maxC": 15, "curve": 1.2, "seed": 42381, "seq": 75, "grad": true,
+  "lines": true, "letters": true, "ink": "#d63031", "lineColor": "#fab1a0",
+  "font": "BioRhyme Expanded", "weight": 800, "fill": 90, "fillExp": 0.5,
+  "jMt": 3, "jMb": 3, "jMl": 3, "jMr": 3, "jLineH": 0,
+  "amrColor": "#6c5ce7", "amrFit": false, "amrSize": 55, "amrLine": 44,
+  "amrFont": "BioRhyme Expanded", "amrWeight": 700,
+  "amrMt": 5, "amrMb": 5, "amrMl": 8, "amrMr": 8, "amrMv": 5, "amrMh": 8,
+  "fText": "FESTIVAL", "fColor": "#00b894", "fSize": 18, "fGap": 4,
+  "fMt": 8, "fMb": 8, "fMl": 0, "fMr": 0, "fLineH": 0,
+  "fPlay": true, "fRows": 7, "fSpeedMin": -15, "fSpeedMax": 15, "fSeed": 71234,
+  "fFont": "BioRhyme Expanded", "fWeight": 300,
+  "layerDefs": [
+    {
+      "id": "division", "moduleId": "division",
+      "params": {
+        "minC": 0.6, "maxC": 15, "curve": 1.2, "seed": 42381, "seq": 75, "grad": true,
+        "lines": true, "letters": true, "ink": "#d63031", "lineColor": "#fab1a0",
+        "font": "BioRhyme Expanded", "weight": 800, "fill": 90, "fillExp": 0.5,
+        "jMt": 3, "jMb": 3, "jMl": 3, "jMr": 3, "jLineH": 0,
+        "glyphs": ["J","A","Z","Z"]
+      }
+    },
+    {
+      "id": "amr", "moduleId": "amr",
+      "params": {
+        "amrColor": "#6c5ce7", "amrFit": false, "amrSize": 55, "amrLine": 44,
+        "amrFont": "BioRhyme Expanded", "amrWeight": 700,
+        "amrMt": 5, "amrMb": 5, "amrMl": 8, "amrMr": 8, "amrMv": 5, "amrMh": 8,
+        "amrChars": ["A","M","R"]
+      }
+    },
+    {
+      "id": "festival", "moduleId": "festival",
+      "params": {
+        "fText": "FESTIVAL", "fColor": "#00b894", "fSize": 18, "fGap": 4,
+        "fMt": 8, "fMb": 8, "fMl": 0, "fMr": 0, "fLineH": 0,
+        "fPlay": true, "fRows": 7, "fSpeedMin": -15, "fSpeedMax": 15, "fSeed": 71234,
+        "fFont": "BioRhyme Expanded", "fWeight": 300
+      }
+    }
+  ],
+  "layerOrder": ["division","amr","festival"],
+  "layerVisibility": { "division": true, "amr": true, "festival": true },
+  "selLayer": 0, "animSpeed": 1, "animOn": false
+}

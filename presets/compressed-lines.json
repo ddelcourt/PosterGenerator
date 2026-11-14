@@ -1,0 +1,48 @@
+{
+  "w": 89.5, "h": 128, "bg": "#2d3436",
+  "glyphs": ["J","A","Z","Z"], "amrChars": ["A","M","R"],
+  "minC": 0.3, "maxC": 8, "curve": 2.1, "seed": 55617, "seq": 50, "grad": false,
+  "lines": true, "letters": false, "ink": "#fd79a8", "lineColor": "#fd79a8",
+  "font": "Cormorant Garamond", "weight": 700, "fill": 60, "fillExp": 1.5,
+  "jMt": 0, "jMb": 0, "jMl": 0, "jMr": 0, "jLineH": 12,
+  "amrColor": "#fdcb6e", "amrFit": true, "amrSize": 50, "amrLine": 42.5,
+  "amrFont": "Cormorant Garamond", "amrWeight": 300,
+  "amrMt": 10, "amrMb": 10, "amrMl": 15, "amrMr": 15, "amrMv": 10, "amrMh": 15,
+  "fText": "FESTIVAL", "fColor": "#a29bfe", "fSize": 14, "fGap": 2,
+  "fMt": 4, "fMb": 4, "fMl": 0, "fMr": 0, "fLineH": 0,
+  "fPlay": true, "fRows": 9, "fSpeedMin": -25, "fSpeedMax": 25, "fSeed": 23456,
+  "fFont": "Cormorant Garamond", "fWeight": 600,
+  "layerDefs": [
+    {
+      "id": "division", "moduleId": "division",
+      "params": {
+        "minC": 0.3, "maxC": 8, "curve": 2.1, "seed": 55617, "seq": 50, "grad": false,
+        "lines": true, "letters": false, "ink": "#fd79a8", "lineColor": "#fd79a8",
+        "font": "Cormorant Garamond", "weight": 700, "fill": 60, "fillExp": 1.5,
+        "jMt": 0, "jMb": 0, "jMl": 0, "jMr": 0, "jLineH": 12,
+        "glyphs": ["J","A","Z","Z"]
+      }
+    },
+    {
+      "id": "amr", "moduleId": "amr",
+      "params": {
+        "amrColor": "#fdcb6e", "amrFit": true, "amrSize": 50, "amrLine": 42.5,
+        "amrFont": "Cormorant Garamond", "amrWeight": 300,
+        "amrMt": 10, "amrMb": 10, "amrMl": 15, "amrMr": 15, "amrMv": 10, "amrMh": 15,
+        "amrChars": ["A","M","R"]
+      }
+    },
+    {
+      "id": "festival", "moduleId": "festival",
+      "params": {
+        "fText": "FESTIVAL", "fColor": "#a29bfe", "fSize": 14, "fGap": 2,
+        "fMt": 4, "fMb": 4, "fMl": 0, "fMr": 0, "fLineH": 0,
+        "fPlay": true, "fRows": 9, "fSpeedMin": -25, "fSpeedMax": 25, "fSeed": 23456,
+        "fFont": "Cormorant Garamond", "fWeight": 600
+      }
+    }
+  ],
+  "layerOrder": ["division","amr","festival"],
+  "layerVisibility": { "division": true, "amr": true, "festival": true },
+  "selLayer": 0, "animSpeed": 1, "animOn": false
+}

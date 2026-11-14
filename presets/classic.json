@@ -1,0 +1,48 @@
+{
+  "w": 89.5, "h": 128, "bg": "#ffffff",
+  "glyphs": ["J","A","Z","Z"], "amrChars": ["A","M","R"],
+  "minC": 0.4, "maxC": 20, "curve": 0.5, "seed": 7, "seq": 100, "grad": false,
+  "lines": false, "letters": true, "ink": "#000000", "lineColor": "#cdcdcd",
+  "font": "Inter", "weight": 600, "fill": 82, "fillExp": 0,
+  "jMt": 0, "jMb": 0, "jMl": 0, "jMr": 0, "jLineH": 0,
+  "amrColor": "#e02020", "amrFit": false, "amrSize": 50, "amrLine": 42.5,
+  "amrFont": "Inter", "amrWeight": 600,
+  "amrMt": 2.5, "amrMb": 2.5, "amrMl": 5, "amrMr": 5, "amrMv": 2.5, "amrMh": 5,
+  "fText": "FESTIVAL", "fColor": "#1f3bd8", "fSize": 22, "fGap": 6,
+  "fMt": 6, "fMb": 6, "fMl": 0, "fMr": 0, "fLineH": 0,
+  "fPlay": true, "fRows": 5, "fSpeedMin": -10, "fSpeedMax": 10, "fSeed": 3,
+  "fFont": "Inter", "fWeight": 600,
+  "layerDefs": [
+    {
+      "id": "division", "moduleId": "division",
+      "params": {
+        "minC": 0.4, "maxC": 20, "curve": 0.5, "seed": 7, "seq": 100, "grad": false,
+        "lines": false, "letters": true, "ink": "#000000", "lineColor": "#cdcdcd",
+        "font": "Inter", "weight": 600, "fill": 82, "fillExp": 0,
+        "jMt": 0, "jMb": 0, "jMl": 0, "jMr": 0, "jLineH": 0,
+        "glyphs": ["J","A","Z","Z"]
+      }
+    },
+    {
+      "id": "amr", "moduleId": "amr",
+      "params": {
+        "amrColor": "#e02020", "amrFit": false, "amrSize": 50, "amrLine": 42.5,
+        "amrFont": "Inter", "amrWeight": 600,
+        "amrMt": 2.5, "amrMb": 2.5, "amrMl": 5, "amrMr": 5, "amrMv": 2.5, "amrMh": 5,
+        "amrChars": ["A","M","R"]
+      }
+    },
+    {
+      "id": "festival", "moduleId": "festival",
+      "params": {
+        "fText": "FESTIVAL", "fColor": "#1f3bd8", "fSize": 22, "fGap": 6,
+        "fMt": 6, "fMb": 6, "fMl": 0, "fMr": 0, "fLineH": 0,
+        "fPlay": true, "fRows": 5, "fSpeedMin": -10, "fSpeedMax": 10, "fSeed": 3,
+        "fFont": "Inter", "fWeight": 600
+      }
+    }
+  ],
+  "layerOrder": ["division","amr","festival"],
+  "layerVisibility": { "division": true, "amr": true, "festival": true },
+  "selLayer": 0, "animSpeed": 1, "animOn": false
+}

@@ -204,6 +204,7 @@ function _renderParam(param, container) {
     case 'button':   _rButton(param, container);   break;
     case 'seg':      _rSeg(param, container);      break;
     case 'margins':  _rMargins(param, container);  break;
+    case 'file':     _rFile(param, container);     break;
   }
 }
 
@@ -407,7 +408,55 @@ function _rMargins({ keys, max, step, unit, fmt }, c) {
   });
 }
 
-// ============ LAYER LIST ============
+function _rFile({ key, label, accept, onLoad, isLinked }, c) {
+  const row = _el('div', 'row wide');
+  const lbl = _el('span'); lbl.textContent = label;
+
+  const wrap = _el('div', 'file-load-wrap');
+
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  if (accept) inp.accept = accept;
+  inp.style.display = 'none';
+
+  const loadBtn = _el('button');
+  loadBtn.type = 'button'; loadBtn.className = 'alt file-load-btn';
+
+  const clearBtn = _el('button');
+  clearBtn.type = 'button'; clearBtn.className = 'alt file-clear-btn';
+  clearBtn.textContent = '✕'; clearBtn.title = 'Clear';
+
+  function _refresh() {
+    const path = P[key];
+    const linked = typeof isLinked === 'function' ? isLinked(path) : !!path;
+    if (!path)       loadBtn.textContent = 'Load…';
+    else if (linked) loadBtn.textContent = '✓ ' + path;
+    else             loadBtn.textContent = '⚠ Re-link: ' + path;
+    clearBtn.disabled = !path;
+  }
+  _refresh();
+
+  inp.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (typeof onLoad === 'function') onLoad(file);
+    dispatch(key, file.name);
+    _refresh();
+    inp.value = '';
+  });
+
+  loadBtn.addEventListener('click', () => inp.click());
+  clearBtn.addEventListener('click', () => {
+    dispatch(key, '');
+    _refresh();
+  });
+
+  wrap.append(loadBtn, clearBtn, inp);
+  row.append(lbl, wrap);
+  c.appendChild(row);
+}
+
+
 function layerDisplayName(L) {
   const mod = _modules.find(m => m.id === L.moduleId);
   if (!mod || !mod.params) return L.name;

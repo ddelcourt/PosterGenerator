@@ -341,6 +341,11 @@ input[type=range]::-moz-range-thumb:hover {
   background: var(--button-primary-hover);
 }
 
+input[type=range]:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 /* ============ Dual Range Slider ============ */
 
 .range2-wrap {
@@ -498,7 +503,8 @@ button.alt:hover {
   border-left: none;
 }
 
-.seg button.active {
+.seg button.active,
+.seg button[aria-pressed="true"] {
   background: var(--button-primary);
   color: white;
 }
@@ -730,6 +736,54 @@ button.alt:hover {
 .file-row button {
   flex: 1;
   margin: 0;
+}
+
+.file-row select {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+/* ============ File-load param (image / SVG layers) ============ */
+
+.file-load-wrap {
+  display: flex;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.file-load-btn {
+  flex: 1;
+  margin: 0;
+  font-size: 12px;
+  padding: 6px 8px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-clear-btn {
+  flex: none !important;
+  margin: 0;
+  font-size: 12px;
+  padding: 6px 8px;
+  min-width: 28px;
+}
+
+#loadPresetBtn {
+  flex: none;
+}
+
+.preset-sep {
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 14px 0 2px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
 }
 
 /* ============ Message Status ============ */

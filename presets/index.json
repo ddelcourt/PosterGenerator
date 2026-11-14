@@ -1,0 +1,7 @@
+[
+  { "name": "Classic",          "file": "classic.json" },
+  { "name": "Dark Stage",       "file": "dark-stage.json" },
+  { "name": "Vivid Splash",     "file": "vivid-splash.json" },
+  { "name": "Compressed Lines", "file": "compressed-lines.json" },
+  { "name": "My Take 01",       "file": "_my_take_01.json" }
+]

@@ -50,6 +50,13 @@
         <button id="importJson" class="alt">Load JSON</button>
       </div>
       <input type="file" id="jsonFile" accept=".json" style="display:none">
+      <p class="preset-sep">Presets</p>
+      <div class="file-row">
+        <select id="presetSelect">
+          <option value="">— select a preset —</option>
+        </select>
+        <button id="loadPresetBtn" class="alt">Load</button>
+      </div>
       <div id="msg" role="status"></div>
     </div>
   </section>
@@ -80,8 +87,10 @@
 <script src="js/modules/recursive_div_1.js"></script>
 <script src="js/modules/title_vertical.js"></script>
 <script src="js/modules/gliding_text.js"></script>
+<script src="js/modules/image_layers.js"></script>
 <script src="js/libs/theme.js"></script>
 <script src="js/libs/storage.js"></script>
+<script src="js/libs/presets.js"></script>
 <script src="js/libs/export.js"></script>
 <script src="js/libs/ui.js"></script>
 </body>
