@@ -61,6 +61,19 @@
   </section>
 
 </div>
+<div id="newLayerModal" class="modal-overlay" hidden>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="newLayerModalTitle">
+    <h2 id="newLayerModalTitle" class="modal-title">New Layer</h2>
+    <div class="modal-body">
+      <label class="modal-label" for="newLayerType">Layer Type</label>
+      <select id="newLayerType"></select>
+    </div>
+    <div class="modal-footer">
+      <button type="button" id="newLayerCancel" class="alt">Cancel</button>
+      <button type="button" id="newLayerCreate">Create</button>
+    </div>
+  </div>
+</div>
 <main id="stage"></main>
 
 <script src="js/app.js"></script>

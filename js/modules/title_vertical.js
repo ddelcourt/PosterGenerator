@@ -62,7 +62,7 @@ function buildUI(container) {
 window.AMRApp.registerModule({
   id: 'amr',
   patch: 'title_vertical',
-  name: 'AMR',
+  name: 'Title Vertical',
 
   defaults: {
     amrColor: '#e02020', amrFit: false, amrSize: 50, amrLine: 42.5,
@@ -92,7 +92,7 @@ window.AMRApp.registerModule({
   buildUI,
 
   layers: [{
-    id: 'amr', name: 'AMR', visible: true, cached: true,
+    id: 'amr', name: 'Title Vertical', visible: true, cached: true,
     key: () => [P.w, P.h, P.amrMt, P.amrMb, P.amrMl, P.amrMr, P.amrColor, P.amrFit, P.amrSize, P.amrLine, AMR.join(''), P.amrFont, P.amrWeight].join(),
     draw: _draw,
     svg:  _svg

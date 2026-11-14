@@ -256,7 +256,7 @@ function _addColor(container, key, label) {
 window.AMRApp.registerModule({
   id: 'division',
   patch: 'recursive_div_1',
-  name: 'Jazz',
+  name: 'Recursive Div 1',
 
   defaults: {
     minC: 0.4, maxC: 20, curve: 0.5, seed: 7, seq: 100, grad: false,
@@ -286,7 +286,7 @@ window.AMRApp.registerModule({
   build: _buildCells,
 
   layers: [{
-    id: 'division', name: 'Jazz', visible: true, cached: true,
+    id: 'division', name: 'Recursive Div 1', visible: true, cached: true,
     key: () => [P.w, P.h, P.seed, P.seq, P.minC, P.maxC, P.curve,
                 P.jMt, P.jMb, P.jMl, P.jMr, P.jLineH,
                 P.glyphs ? P.glyphs.join('') : GLYPHS.join(''),

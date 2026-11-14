@@ -73,7 +73,7 @@ function _svg() {
 window.AMRApp.registerModule({
   id: 'festival',
   patch: 'gliding_text',
-  name: 'Festival',
+  name: 'Gliding Text',
 
   defaults: {
     fText: 'FESTIVAL', fColor: '#1f3bd8', fSize: 22, fGap: 6,
@@ -107,7 +107,7 @@ window.AMRApp.registerModule({
   ],
 
   layers: [{
-    id: 'festival', name: 'Festival', visible: true,
+    id: 'festival', name: 'Gliding Text', visible: true,
     draw: _draw,
     svg:  _svg,
     advance()   { if (P.fPlay) festAdvance(); },

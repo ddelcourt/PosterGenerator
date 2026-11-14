@@ -647,6 +647,40 @@ document.querySelectorAll('#palettes .pal:not(#properties) [data-k]').forEach(el
   });
 });
 
+function openNewLayerModal() {
+  const sel = document.getElementById('newLayerType');
+  sel.innerHTML = _modules.map(m =>
+    `<option value="${_esc(m.id)}">${_esc(m.name)}</option>`
+  ).join('');
+  document.getElementById('newLayerModal').hidden = false;
+  sel.focus();
+}
+
+function closeNewLayerModal() {
+  document.getElementById('newLayerModal').hidden = true;
+}
+
 document.getElementById('addLayerBtn').addEventListener('click', () => {
-  if (_modules.length) addLayer(_modules[0].id);
+  if (_modules.length) openNewLayerModal();
 });
+
+document.getElementById('newLayerCancel').addEventListener('click', closeNewLayerModal);
+
+document.getElementById('newLayerCreate').addEventListener('click', () => {
+  const moduleId = document.getElementById('newLayerType').value;
+  closeNewLayerModal();
+  addLayer(moduleId);
+});
+
+// Close on backdrop click.
+document.getElementById('newLayerModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeNewLayerModal();
+});
+
+// Keyboard handling inside the modal (capture phase runs before ui.js's Tab/Enter handlers).
+document.addEventListener('keydown', e => {
+  const modal = document.getElementById('newLayerModal');
+  if (modal.hidden) return;
+  if (e.key === 'Tab' || e.key === 'Enter') e.stopPropagation();
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeNewLayerModal(); }
+}, true);
