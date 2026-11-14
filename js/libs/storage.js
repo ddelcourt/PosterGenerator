@@ -1,16 +1,56 @@
 // ============ STORAGE ============
 // Persistence via localStorage. All functions rely on globals from app.js (P, GLYPHS, AMR, etc.)
+//
+// Architecture rule: module params live ONLY inside layerDefs[n].params, never at the
+// top level of a snapshot. This guarantees each param is serialised exactly once,
+// regardless of how large the value is (including base64 image data URLs).
+
+// Keys written at the top level of every snapshot. Module-specific param keys are
+// intentionally excluded — they belong exclusively to their layer's params object.
+const _CORE_KEYS = new Set([
+  'w', 'h', 'bg', 'glyphs', 'amrChars',
+  'layerDefs', 'layerOrder', 'layerVisibility', 'selLayer', 'animSpeed', 'animOn'
+]);
+
+// Builds a clean layerDefs array, filtering each layer's params to only the
+// keys declared in its module's defaults. Removes stale keys from old code.
+function _cleanLayerDefs() {
+  return layers.map(l => {
+    const mod = _modules.find(m => m.id === l.moduleId);
+    const known = mod ? new Set(Object.keys(mod.defaults || {})) : null;
+    const params = known
+      ? Object.fromEntries(Object.entries(l.params || {}).filter(([k]) => known.has(k)))
+      : { ...(l.params || {}) };
+    return { id: l.id, moduleId: l.moduleId, params };
+  });
+}
+
+// Strips any top-level keys not in _CORE_KEYS from a parsed snapshot before
+// merging into P. Also filters each layerDef's params to its module's known keys.
+// Handles old JSON files that stored module params at the top level.
+function _cleanSnapshot(snap) {
+  Object.keys(snap).forEach(k => { if (!_CORE_KEYS.has(k)) delete snap[k]; });
+  if (Array.isArray(snap.layerDefs)) {
+    snap.layerDefs = snap.layerDefs.map(def => {
+      const mod = _modules.find(m => m.id === def.moduleId);
+      if (!mod) return def;
+      const known = new Set(Object.keys(mod.defaults || {}));
+      return { ...def, params: Object.fromEntries(Object.entries(def.params || {}).filter(([k]) => known.has(k))) };
+    });
+  }
+}
 
 function saveState() {
-  P.glyphs          = [...GLYPHS];
-  P.amrChars        = [...AMR];
-  P.layerDefs       = layers.map(l => ({ id: l.id, moduleId: l.moduleId, params: { ...(l.params || {}) } }));
-  P.layerOrder      = layers.map(l => l.id);
-  P.layerVisibility = Object.fromEntries(layers.map(l => [l.id, l.visible]));
-  P.selLayer        = selLayer;
-  P.animSpeed       = animSpeed;
-  P.animOn          = animOn;
-  localStorage.setItem('jazz-poster-state', JSON.stringify(P));
+  const snap = { w: P.w, h: P.h, bg: P.bg };
+  snap.glyphs          = [...GLYPHS];
+  snap.amrChars        = [...AMR];
+  snap.layerDefs       = _cleanLayerDefs();
+  snap.layerOrder      = layers.map(l => l.id);
+  snap.layerVisibility = Object.fromEntries(layers.map(l => [l.id, l.visible]));
+  snap.selLayer        = selLayer;
+  snap.animSpeed       = animSpeed;
+  snap.animOn          = animOn;
+  localStorage.setItem('jazz-poster-state', JSON.stringify(snap));
 }
 
 function syncUIFromP() {
@@ -93,28 +133,37 @@ function syncUIFromP() {
 function loadState() {
   const saved = localStorage.getItem('jazz-poster-state');
   if (saved) {
-    try { Object.assign(P, JSON.parse(saved)); } catch(e) {}
+    try {
+      const snap = JSON.parse(saved);
+      _cleanSnapshot(snap);
+      Object.assign(P, snap);
+    } catch(e) {}
   }
   syncUIFromP();
+  saveState();   // re-save immediately so stale keys are purged from localStorage
 }
 
 function exportJSON() {
-  P.glyphs          = [...GLYPHS];
-  P.amrChars        = [...AMR];
-  P.layerDefs       = layers.map(l => ({ id: l.id, moduleId: l.moduleId, params: { ...(l.params || {}) } }));
-  P.layerOrder      = layers.map(l => l.id);
-  P.layerVisibility = Object.fromEntries(layers.map(l => [l.id, l.visible]));
-  P.selLayer        = selLayer;
-  P.animSpeed       = animSpeed;
-  P.animOn          = animOn;
-  return JSON.stringify(P, null, 2);
+  const snap = { w: P.w, h: P.h, bg: P.bg };
+  snap.glyphs          = [...GLYPHS];
+  snap.amrChars        = [...AMR];
+  snap.layerDefs       = _cleanLayerDefs();
+  snap.layerOrder      = layers.map(l => l.id);
+  snap.layerVisibility = Object.fromEntries(layers.map(l => [l.id, l.visible]));
+  snap.selLayer        = selLayer;
+  snap.animSpeed       = animSpeed;
+  snap.animOn          = animOn;
+  return JSON.stringify(snap, null, 2);
 }
 
 function importJSON(json) {
   try {
-    Object.assign(P, JSON.parse(json));
+    const snap = JSON.parse(json);
+    _cleanSnapshot(snap);
+    Object.assign(P, snap);
     syncUIFromP();
     build(); redraw();
     saveState();
   } catch(e) { alert('Invalid JSON'); }
 }
+

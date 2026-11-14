@@ -78,6 +78,7 @@ window.AMRApp.registerModule({
 | `button` | Action button |
 | `seg` | Segmented / radio button group |
 | `margins` | Four sliders for T/B/L/R margin keys |
+| `file` | File picker; stores filename only — `onLoad(file)` and `isLinked(path)` callbacks |
 
 ---
 

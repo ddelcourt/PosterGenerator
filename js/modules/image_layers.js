@@ -1,50 +1,35 @@
 // ============ IMAGE / SVG LAYER MODULES ============
 // A single factory registers two modules:
-//   • svg_layer   – loads a local SVG file
-//   • image_layer – loads a local PNG / JPG / WebP file
+//   • svg_layer   – loads a local SVG file and renders it as a layer
+//   • image_layer – loads a local PNG / JPG / WebP file as a layer
 //
-// Only the filename is stored in params/JSON — no image data is serialised.
-// Actual file content lives in a per-module session Map (blob URL for drawing,
-// data URL for SVG export) and must be re-linked after a page reload.
+// The file is stored as a base64 data URL inside each layer's params so the
+// JSON export is fully self-contained — no re-linking needed after reload.
+// A separate 'Name' key stores just the filename for the UI button label.
+//
+// Storage note: large raster images inflate JSON/localStorage proportionally
+// (~33 % base64 overhead). Typical poster graphics (SVGs, logos) stay small.
 
 (function () {
 
   function makeImageModule(id, name, accept, prefix) {
-    // p(suffix) builds the namespaced param key, e.g. p('Path') → 'svgPath' or 'imgPath'
+    // p(suffix) → namespaced key, e.g. p('Src') → 'svgSrc' or 'imgSrc'
     const p = s => prefix + s;
 
-    // Session-only — never written to params or JSON.
-    // filename → { blobUrl: string, dataUrl: string|null }
-    const _sessions = new Map();
+    // dataUrl → HTMLImageElement (session cache — avoids recreating Image on every frame)
+    const _cache = new Map();
 
-    // url → HTMLImageElement
-    const _imgCache = new Map();
-
-    // Called by _rFile when the user picks a file.
-    function _registerFile(file) {
-      const prev = _sessions.get(file.name);
-      if (prev) URL.revokeObjectURL(prev.blobUrl);
-      const entry = { blobUrl: URL.createObjectURL(file), dataUrl: null };
-      _sessions.set(file.name, entry);
-      // Read data URL for SVG export (async but fast for local files).
-      const reader = new FileReader();
-      reader.onload = ev => { entry.dataUrl = ev.target.result; };
-      reader.readAsDataURL(file);
-    }
-
-    function _isLinked(path) { return !!path && _sessions.has(path); }
-
-    function _loadImg(url) {
-      let img = _imgCache.get(url);
+    function _loadImg(src) {
+      let img = _cache.get(src);
       if (img) return img;
       img = new Image();
       img.onload = () => redraw();
-      img.src = url;
-      _imgCache.set(url, img);
+      img.src = src;
+      _cache.set(src, img);
       return img;
     }
 
-    // Compute the destination rect (in cm) for the given Image element.
+    // Compute destination rect (cm) applying the chosen fit mode.
     function _dest(img) {
       const bw = P[p('W')] > 0 ? P[p('W')] : P.w;
       const bh = P[p('H')] > 0 ? P[p('H')] : P.h;
@@ -61,16 +46,14 @@
         else              { dh = bh; dw = dh * ar; }
         dx = bx + (bw - dw) / 2; dy = by + (bh - dh) / 2;
       }
-      // 'stretch': dw/dh stay at bw/bh, no offset adjustment
+      // 'stretch': fill the box exactly, aspect ratio ignored
       return { bx, by, bw, bh, dx, dy, dw, dh };
     }
 
     function _draw(g, k) {
-      const path = P[p('Path')];
-      if (!path) return;
-      const entry = _sessions.get(path);
-      if (!entry) return;   // not linked in this session — render nothing
-      const img = _loadImg(entry.blobUrl);
+      const src = P[p('Src')];
+      if (!src) return;
+      const img = _loadImg(src);
       if (!img || !img.complete || !img.naturalWidth) return;
 
       const { bx, by, bw, bh, dx, dy, dw, dh } = _dest(img);
@@ -86,12 +69,8 @@
     }
 
     function _svg() {
-      const path = P[p('Path')];
-      if (!path) return '';
-      const entry = _sessions.get(path);
-      if (!entry) return '';
-      // Prefer data URL (portable, embedded) — falls back to blob URL (session-only).
-      const src = entry.dataUrl ?? entry.blobUrl;
+      const src = P[p('Src')];
+      if (!src) return '';
       const f = v => +v.toFixed(4);
       const bw = P[p('W')] > 0 ? P[p('W')] : P.w;
       const bh = P[p('H')] > 0 ? P[p('H')] : P.h;
@@ -118,8 +97,8 @@
       name,
 
       defaults: {
-        [p('Path')]:    '',
-        [p('Label')]:   '',
+        [p('Src')]:     '',   // base64 data URL — the actual image content
+        [p('Name')]:    '',   // original filename — display only, not used for drawing
         [p('X')]:       0,
         [p('Y')]:       0,
         [p('W')]:       0,
@@ -130,8 +109,7 @@
 
       params: [
         { type: 'section', label: name },
-        { type: 'file',  key: p('Path'),    label: 'File',                accept, onLoad: _registerFile, isLinked: _isLinked },
-        { type: 'text',  key: p('Label'),   label: 'Label',               placeholder: 'Layer label' },
+        { type: 'file',  key: p('Src'), nameKey: p('Name'), label: 'File', accept },
         { type: 'sep' },
         { type: 'section', label: 'Position & Size' },
         { type: 'range', key: p('X'),       label: 'X',                   min: -100, max: 300, step: 0.5,  unit: 'cm', fmt: 2 },
@@ -153,7 +131,7 @@
         name,
         visible: true,
         draw: _draw,
-        svg: _svg
+        svg:  _svg
       }]
     });
   }
@@ -171,4 +149,5 @@
   );
 
 }());
+
 

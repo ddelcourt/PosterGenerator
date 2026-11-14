@@ -408,7 +408,7 @@ function _rMargins({ keys, max, step, unit, fmt }, c) {
   });
 }
 
-function _rFile({ key, label, accept, onLoad, isLinked }, c) {
+function _rFile({ key, nameKey, label, accept }, c) {
   const row = _el('div', 'row wide');
   const lbl = _el('span'); lbl.textContent = label;
 
@@ -427,26 +427,32 @@ function _rFile({ key, label, accept, onLoad, isLinked }, c) {
   clearBtn.textContent = '✕'; clearBtn.title = 'Clear';
 
   function _refresh() {
-    const path = P[key];
-    const linked = typeof isLinked === 'function' ? isLinked(path) : !!path;
-    if (!path)       loadBtn.textContent = 'Load…';
-    else if (linked) loadBtn.textContent = '✓ ' + path;
-    else             loadBtn.textContent = '⚠ Re-link: ' + path;
-    clearBtn.disabled = !path;
+    const hasData = !!P[key];
+    const name    = nameKey ? (P[nameKey] || '') : '';
+    loadBtn.textContent = hasData ? (name || 'Replace…') : 'Load…';
+    clearBtn.disabled   = !hasData;
   }
   _refresh();
 
   inp.addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
-    if (typeof onLoad === 'function') onLoad(file);
-    dispatch(key, file.name);
-    _refresh();
-    inp.value = '';
+    const reader = new FileReader();
+    reader.onload = ev => {
+      if (nameKey) dispatch(nameKey, file.name);
+      dispatch(key, ev.target.result);   // stores the full data URL in params
+      _refresh();
+      inp.value = '';
+      const msg = document.getElementById('msg');
+      if (msg && ev.target.result.length > 1.5 * 1024 * 1024)
+        msg.textContent = `⚠ Large image (${(ev.target.result.length / 1024 / 1024).toFixed(1)} MB encoded) — JSON export will be larger.`;
+    };
+    reader.readAsDataURL(file);
   });
 
   loadBtn.addEventListener('click', () => inp.click());
   clearBtn.addEventListener('click', () => {
+    if (nameKey) dispatch(nameKey, '');
     dispatch(key, '');
     _refresh();
   });
